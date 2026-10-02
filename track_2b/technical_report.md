@@ -1,220 +1,169 @@
 # Technical report — Apertus QA: grounded Spanish answers over official statistics
 
-> **DRAFT (round 2, 2 Oct 2026).** All results below come from the **STUB** (replayed outputs written by the build agent,
-> not by Apertus) or from the **no-model baseline**. Every Apertus number is a placeholder of the form `[[APERTUS_…]]` and
-> will be filled from real runs once the CSCS key is available. Placeholders must be gone before the PDF is exported.
-
-- **Track:** `Track 2B — Apertus QA (own project)`
+- **Track:** Track 2B — Apertus QA (own project)
 - **Event:** Online
-- **Team:** Vento Labs — `[[ENTRANT_LEGAL_NAME as on Devpost]]`
-- **Demo:** `[[VIDEO_URL]]` (≤ 2 min, screen capture + captions, no voice)
-- **Repository / commit:** `[[PUBLIC_REPO_URL]]` @ `[[COMMIT]]`
+- **Team:** Vento Labs — `[[ENTRANT_NAME]]`
+- **Demo:** `[[VIDEO_URL]]` (≤ 2 min, screen capture + captions)
+- **Code:** `[[REPO_URL]]` @ `[[COMMIT]]`
+
+> **Draft status.** Numbers marked *STUB* come from replayed outputs **written by the build agent, not by Apertus**, or
+> from the no-model baseline. `[[REAL_RESULTS: …]]` marks space reserved for real Apertus runs (≈0.3–0.5 page).
 
 ## 1. Summary
 
-People ask statistical questions in plain language ("how much did prices rise last month?"). General-purpose chatbots
-answer fluently, but the figure is often unsourced, out of date or wrong. For a newsroom, a public office or a school that
-is worse than no answer. **Apertus QA** answers Spanish questions over a local, licence-checked snapshot of official
-Argentine open data (47 series and tables from INDEC and other agencies, CC BY 4.0). Apertus does the two jobs that need
-language understanding: it **plans** the query (which series, which operation, which period) and it **phrases** the answer.
-It never produces a number, and it never sees one. A deterministic data layer computes every figure, and code attaches the
-citation (publisher, series id, period, licence). If the snapshot cannot answer, the system says so, and it refuses
-forecasts and financial advice. Everything except the model call runs with no network (`docker run --network none`), and
-the model endpoint can be a self-hosted Apertus inside the same isolated network. **Headline (STUB / baseline, to be
-replaced):** main set 31/31, held-out paraphrases 8/13, 0 grounding violations, 5/5 INDEC cross-checks.
-**Apertus 8B:** main `[[APERTUS_MAIN]]`, held-out `[[APERTUS_HELDOUT]]`, grounding violations `[[APERTUS_GV]]`.
+General-purpose chatbots answer statistical questions fluently but often with unsourced, stale or wrong figures. For a
+newsroom, public office or school that is worse than no answer. **Apertus QA** answers Spanish questions over a local,
+licence-checked snapshot of official Argentine open data (47 series and tables from INDEC and other agencies, CC BY 4.0).
+Apertus does the language work: it **plans** the query (series, operation, period) and **phrases** the answer. It never
+produces or sees a number. Deterministic code computes every figure and attaches the citation. The system says when the
+data cannot answer, and refuses forecasts and financial advice. Everything except the model call runs with
+`docker run --network none`, and the model can be a self-hosted Apertus on the same isolated network.
+*STUB/baseline:* main set 31/31, held-out paraphrases 8/13, 0 grounding violations, 5/5 INDEC cross-checks.
+[[REAL_RESULTS: one-sentence headline — Apertus 8B main x/31, held-out y/13, grounding violations z]]
 
 ## 2. Architecture
 
 ```
-question ─▶ input guard ─▶ [P1 router: Apertus] ─▶ plan JSON ─▶ validate_plan (catalog ids, period, op/kind,
-                                │ invalid / timeout / no model            amount must appear in the question)
-                                └──▶ rules router (fallback + baseline) ──┤ valid
-                                                                          ▼
-                      ops.run: 13 deterministic operations over data/snapshot (sha256 + licence verified at start)
-                                                                          │ figures, placeholder slots, citations
-                                                                          │ (no data ─▶ "no tengo ese dato", with coverage)
-                                                                          ▼
-          [P2 phrasing: Apertus — sees placeholder NAMES and direction hints, never values] ─▶ validate_phrase
-                                │ invalid / timeout / no model                    (no digits, no number words,
-                                └──▶ per-operation template ──────────────────────┤ known placeholders, banned words)
-                                                                                  ▼
-                            render slots ─▶ grounding re-check ─▶ answer + citation + figures table + trace
-                                         Web UI (/) · JSON API (/api/ask, /api/catalog, /health) · CLI
+question ─▶ P1 router (Apertus) ─▶ plan JSON ─▶ validate_plan: catalog ids, period, op,
+               │                                 amount must appear in the question
+               └─ invalid / timeout / no model ─▶ rules router
+                                   ▼
+ops.run: 13 deterministic operations over data/snapshot (sha256 + licence checked at start)
+                                   ▼  figures · placeholder slots · citations
+P2 phrasing (Apertus; placeholder NAMES + hints only) ─▶ validate_phrase: no digits or
+               │                                 number words, known placeholders only
+               └─ invalid / timeout / no model ─▶ per-operation template
+                                   ▼
+render ─▶ grounding re-check ─▶ answer + citation + figures + trace (Web UI · JSON API · CLI)
 ```
+One container, one stateless process: Python 3.12 **standard library only** (no `pip install`, no database). The ≈0.3 MB
+snapshot ships in the image. The Spanish UI is one HTML file with no external assets (a test asserts it). Modules
+(`src/apertus_qa/`): `catalog`, `ops` (value, latest, change, monthly, year-on-year, max, min, annual total, ranking,
+inflation adjustment, comparison, table top-n/value), `gateway`, `providers` (OpenAI-compatible, stub replay, recorder),
+`prompts`, `validate`, `rules`, `pipeline`, `server`.
+**LLM gateway** (ported from the team's *Ciclo* prototype, §9): never throws; per-minute/per-day budgets, timeout, circuit
+breaker (transport failures only), tolerant JSON parsing, schema + semantic validation, deterministic fallback with a
+machine-readable reason (`network_error`, `http_error`, `bad_response`, `budget_exhausted`, `breaker_open`, validator
+rejection) shown in the trace and the UI.
 
-**One container, one process.** Python 3.12 standard library only: no third-party packages, no `pip install`, no
-database. The snapshot (≈0.3 MB of CSV plus `catalog.json`) ships inside the image. The Spanish web UI is a single HTML
-file with no CDN, fonts or other external assets (a test asserts this).
+**Grounding guarantees** (each covered by tests):
 
-**Components** (`src/apertus_qa/`): `catalog.py` (loads the snapshot and checks sha256 and licence for every file),
-`ops.py` (13 operations: value, latest, change, monthly change, year-on-year, max, min, annual total, ranking, inflation
-adjustment, comparison, table top-n, table value), `gateway.py` (LLM gateway), `providers.py` (OpenAI-compatible client,
-stub replay, recorder), `prompts.py`, `validate.py`, `rules.py`, `pipeline.py`, `server.py`, `__main__.py`.
-
-**LLM gateway.** The gateway never throws. It enforces a per-minute and per-day request budget, a timeout and a circuit
-breaker (transport failures only; invalid content does not trip it). It parses JSON tolerantly, including fenced output,
-validates it against a schema and semantic rules, and otherwise returns a deterministic fallback with a machine-readable
-reason (for example `network_error`, `http_error`, `bad_response`, `budget_exhausted`, `breaker_open`, or a validator rejection). The reason appears in
-the trace and in the UI.
-
-### 2.1 Grounding guarantees (by construction, each covered by tests)
-
-1. **Numbers come only from `ops.py`**, computed from the verified snapshot.
-2. **The phrasing model never receives a figure.** It gets placeholder names (`{variacion}`, `{periodo}`) and qualitative
-   hints (`direccion: subió`). A test against a fake OpenAI-style server asserts that the computed figure never appears in the phrasing request.
-3. **Any digit or number word in model text is rejected**, and the template is used instead.
-4. **The router cannot invent inputs.** Series must exist in the catalog, periods must be well-formed, and an amount to
-   adjust for inflation must appear literally in the question.
-5. **The final text is re-checked.** Every numeric token in the rendered answer must come from a computed slot value.
-6. **Citations are written by code, not by the model**: publisher, series id, period range, licence and portal.
-
-These guarantees bound the failure mode: a bad plan that still validates can give a *correct, cited figure for the wrong
-question* (Section 6), but it cannot give an invented figure. Users can spot that case because the UI shows the series
-and period used, next to the answer.
-
-### 2.2 Target architecture (mandatory): **b) Air-gapped** (also a) on-premise and c) sovereign Swiss cloud)
-
-| Stage | External network | Notes |
+| # | Guarantee | Mechanism |
 |---|---|---|
-| Build | Base image only (`python:3.12-slim`, pulled by the daemon) | All `RUN` steps execute with `docker build --network none`. Isolated sites: `make image-save` → copy `apertus-qa.tar` → `docker load`. |
-| Data | None | Snapshot inside the image; integrity (sha256) and licence verified at start-up. Refreshes are built *outside* the site and shipped as a new image. |
-| Runtime: UI, API, computation, citations, refusals | None | Verified with `--network none` (Section 2.3). |
-| Runtime: model | Only `LLM_BASE_URL` | CSCS-hosted Apertus (Switzerland) or a self-hosted Apertus (vLLM, Ollama or llama.cpp; OpenAI-style API) on the same isolated network. The API key is optional for local servers. |
-| Model unreachable | None | Falls back to rules and templates. Answers stay correct and cited, and the UI shows the mode. |
+| G1 | Numbers come only from code | `ops.py` computes from the verified snapshot |
+| G2 | The phrasing model never sees a figure | Gets placeholder names and hints (`direccion: subió`); a test with a fake endpoint asserts the figure is absent from the request |
+| G3 | Model text cannot carry numbers | Any digit or number word → rejected → template |
+| G4 | The router cannot invent inputs | Series must exist in the catalog; periods well-formed; an amount to adjust must appear in the question |
+| G5 | Final text is re-checked | Every numeric token must equal a computed slot value |
+| G6 | Citations are written by code | Publisher, series id, period, licence, portal |
 
-`docs/deploy/docker-compose.airgap.yml` sketches the fully isolated set-up: app and vLLM serving local Apertus weights
-(`HF_HUB_OFFLINE=1`) on a Docker network with `internal: true`, so there is no route out. *(Not run by us: no GPU was
-available. `[[SELF_HOST_RESULT or "untested"]]`.)*
+Residual failure mode: a valid but *wrong* plan gives a real, cited figure for a slightly different question (§6). The UI
+shows series and period next to every answer so users can spot it.
 
-### 2.3 Air-gap proof
+### Target architecture (mandatory): **b) Air-gapped** — also a) on-premise and c) sovereign Swiss cloud
 
-`make offline-proof` (script in `scripts/offline_proof.sh`, full output in `docs/OFFLINE.md`) runs the image with
-`--network none` and shows the following:
+| Stage | External network | How |
+|---|---|---|
+| Build | Base image only (`python:3.12-slim`) | All `RUN` steps run under `docker build --network none`. Isolated sites: `make image-save` → `docker load`. |
+| Data | None | Snapshot inside the image; sha256 + licence checked at start; refreshed outside the site as a new image. |
+| Runtime: UI, API, computation, citations | None | Proven with `--network none` (below). |
+| Runtime: model | Only `LLM_BASE_URL` | CSCS-hosted Apertus (Switzerland) or self-hosted (vLLM/Ollama/llama.cpp, OpenAI-style API, key optional) in the same isolated network. |
+| Model unreachable | None | Rules + templates: answers stay correct and cited; the UI shows the mode. |
 
-- Only `lo` exists inside the container.
-- Connecting to `1.1.1.1:443` or `8.8.8.8:53` fails with `Network is unreachable`, and DNS resolution fails.
-- The server, started with its default command, answers `/health` and `/api/ask` from inside the same container, with
-  correct cited answers and refusals.
-- The 35 tests and all four evaluation runs (main and held-out × STUB and off) pass with identical scores.
-- In `real` mode with no network, the trace records `router: fallback (network_error)` and the answer is still correct and
-  cited. This shows the model call is the **only** network dependency.
+**Air-gap proof** (`make offline-proof`; full transcript in `docs/OFFLINE.md`). Under `--network none` only `lo` exists;
+connections to `1.1.1.1:443` / `8.8.8.8:53` fail (`Network is unreachable`) and DNS fails; the server answers `/health`
+and `/api/ask` inside the container; 35 tests and all four eval runs pass with unchanged scores; in `real` mode the trace
+shows `fallback (network_error)` and the answer is still correct and cited — the model call is the only network dependency.
+`docs/deploy/docker-compose.airgap.yml` sketches app + vLLM with local Apertus weights on an `internal: true` network
+(not run: no GPU).
 
 ## 3. Use of Apertus
 
-- **Model:** `swiss-ai/Apertus-v1.5-8B` `[[confirm exact LLM_NAME from CSCS]]`; 70B `[[if time]]`.
-- **How it is used:** inference in two roles. (P1) **tool-use-style planning**: the model emits one JSON plan over a catalog
-  of 47 entries. (P2) **constrained generation**: Spanish phrasing with placeholders only.
-- **Where it runs:** CSCS inference endpoint (OpenAI-compatible `/chat/completions`, temperature 0) via `LLM_BASE_URL`,
-  `LLM_NAME` and `LLM_API_KEY`. The same code runs against any self-hosted OpenAI-style server.
-- **P1 router prompt** (`prompts.ROUTER_SYSTEM`): Spanish instructions plus a compact catalog (ids, titles, units,
-  frequency and coverage, **no values**; ≈4k tokens). The output is either
-  `{action, op, series|group, period|from|to, measure, amount, n, key}` or `{action: "refuse", reason}`. Refusal reasons
-  are `fuera_de_alcance | pronostico | consejo | otro`. Periods outside coverage are passed through so code can explain the
-  coverage instead of guessing.
-- **P2 phrasing prompt** (`prompts.PHRASE_SYSTEM`): input is the question, the operation, placeholder descriptions,
-  required placeholders and direction hints. Output is `{"texto": …}`, one or two Spanish sentences.
-- **JSON handling:** optional `response_format: json_object` (`LLM_JSON_MODE=1`) when the endpoint supports it; otherwise
-  tolerant parsing.
-- **Record and replay:** `LLM_MODE=record` stores real Apertus outputs (`stub/recorded.json`), so judges can replay a real
-  run without a key or network. Replayed runs are labelled as such.
-- **Observed behaviour:** `[[APERTUS_OBSERVATIONS: JSON validity rate, typical plan errors, phrase rejections by reason,
-  latency p50/p95, effect of prompt iterations]]`.
+| Aspect | Setup |
+|---|---|
+| Model | `swiss-ai/Apertus-v1.5-8B` `[[REAL_RESULTS: confirm exact LLM_NAME; 70B if run]]` |
+| Usage | Inference in two roles: P1 tool-use-style **planning** (one JSON plan over a 47-entry catalog) and P2 **constrained generation** (Spanish phrasing with placeholders only) |
+| Serving | CSCS endpoint or any OpenAI-style server via `LLM_BASE_URL`, `LLM_NAME`, `LLM_API_KEY`; `/chat/completions`, temperature 0; optional `response_format: json_object` |
+| P1 prompt | Spanish instructions + compact catalog (ids, titles, units, frequency, coverage; **no values**; ≈4k tokens) → `{action, op, series, period, from, to, amount, n, …}` or `{action: "refuse", reason}` (out of scope / forecast / advice / other). Out-of-coverage periods pass through so code can explain coverage. |
+| P2 prompt | Question, operation, placeholder descriptions, direction hints → `{"texto": …}`, one or two sentences |
+| Record/replay | `LLM_MODE=record` saves real outputs, so judges can replay a real run with no key or network (labelled as replay) |
 
-No other model is used at runtime or for evaluation (scoring is deterministic code; there is no LLM judge).
+[[REAL_RESULTS: observed behaviour — JSON validity rate, typical plan errors, phrasing rejections by reason, latency p50/p95, prompt iterations]]
+
+No other model is used at runtime or in evaluation (scoring is deterministic code, no LLM judge).
 
 ## 4. Data
 
 | Domain | Content | Publisher |
 |---|---|---|
-| Prices | CPI national level (monthly, Dec 2016 → Aug 2026); Dec–Dec inflation | INDEC |
-| Wages | Registered wage index, Dec–Dec change | INDEC |
-| Population, births | Population 2004–2025; live births (to 2022, declared) | INDEC; DEIS / Ministerio de Salud |
-| Exchange rate, trade | Nominal annual exchange rate; exports, total and 4 categories | INDEC / Ministerio de Economía |
+| Prices, wages | CPI national (monthly, Dec 2016 → Aug 2026), Dec–Dec inflation; registered wage index | INDEC |
+| Population, births | Population 2004–2025; live births (to 2022, declared) | INDEC; DEIS / Min. Salud |
+| Exchange rate, trade | Nominal annual exchange rate; exports, total + 4 categories | INDEC / Min. Economía |
 | Tourism | Resident tourist trips by destination and mode (27 series) | Subsecretaría de Turismo |
-| Energy | Installed solar, wind and total capacity; crude oil production | CAMMESA; Secretaría de Energía |
-| Transport | Subway passengers; 2025 regular flights by airport and route (counts only) | INDEC; ANAC |
-| Road safety | Road deaths by year and by vehicle | SNIC / Ministerio de Seguridad |
+| Energy | Installed solar / wind / total capacity; crude oil production | CAMMESA; Secretaría de Energía |
+| Transport, road safety | Subway passengers; 2025 flights by airport and route (counts only); road deaths | INDEC; ANAC; SNIC |
 
-**Licence.** All data are **third-party** open data under **CC BY 4.0**, obtained from datos.gob.ar /
-apis.datos.gob.ar, respecting robots.txt and its crawl delay, and only at build time. We redistribute them under their
-original licence with attribution (`data/README.md`, `docs/DATA.md`, and the citation line on every answer). We do not
-relicense them, and we do not publish them as our own dataset on any hub. **Transformations:** time-window trimming;
-microdata (flights, road deaths) reduced to aggregate counts; no personal data enters the repository. A per-file sha256
-is recorded in `catalog.json` and checked at start-up.
+All data are **third-party open data under CC BY 4.0** from datos.gob.ar / apis.datos.gob.ar, fetched at build time only,
+respecting robots.txt and its crawl delay. We redistribute them under their original licence **with attribution**
+(`data/README.md`, `docs/DATA.md`, and a citation on every answer); we do not relicense them or publish them as our own
+dataset. Transformations: time-window trimming; flight and road-death microdata reduced to aggregate counts; no personal
+data. Per-file sha256 in `catalog.json`.
 
 ## 5. Evaluation
 
-**Task.** Spanish questions answered end to end. **Main set:** 31 questions (23 answerable, 8 that must be refused:
-missing period, forecast, out of scope, financial advice, prompt injection). **Held-out set:** 13 paraphrases written
-separately (colloquial wording, ellipsis), not used to write the rules router or prompts.
-
-**Ground truth.** Expected values are computed directly from the snapshot by independent code (`src/eval/make_expected.py`,
-which does not import the app). Five CPI answers are also cross-checked against INDEC's published one-decimal figures.
-
-**Metrics.** *Decision* (answer vs refuse, with reason); *value* (the figure matches the expected value within tolerance);
-*citation* (correct series and period); *grounding violations* (numbers in the text that do not come from a computed figure,
-target 0); *false refusals*; *fallback rates* for router and phrasing, by reason.
+**Sets.** *Main:* 31 Spanish questions — 23 answerable, 8 to refuse (missing period, forecast, out of scope, advice, prompt
+injection). *Held-out:* 13 paraphrases (colloquial, elliptical) written separately and not used to build the rules router
+or prompts. **Ground truth** is computed from the snapshot by independent code (`src/eval/make_expected.py`, which does not
+import the app); five CPI answers are also checked against INDEC's published figures. **Metrics:** decision (answer vs
+refuse), value match, citation (series + period), grounding violations (numbers not traceable to a computed figure;
+target 0), false refusals, fallback rates by reason.
 
 | Setup | Set | Overall | Answers | Refusals | False refusals | Grounding viol. |
 |---|---|---|---|---|---|---|
-| No-model baseline (rules + templates) | main (31) | 31/31 | 23/23 | 8/8 | 0 | 0 |
-| STUB replay (agent-written, **not Apertus**) | main (31) | 31/31 | 23/23 | 8/8 | 0 | 0 |
-| No-model baseline | held-out (13) | 8/13 | 6/11 | 2/2 | 4 | 0 |
-| **Apertus 8B** | main (31) | `[[A8_MAIN]]` | `[[ ]]` | `[[ ]]` | `[[ ]]` | `[[ ]]` |
-| **Apertus 8B** | held-out (13) | `[[A8_HO]]` | `[[ ]]` | `[[ ]]` | `[[ ]]` | `[[ ]]` |
-| Apertus 70B (optional) | held-out (13) | `[[A70_HO]]` | | | | |
+| No-model baseline (rules + templates) | main | 31/31 | 23/23 | 8/8 | 0 | 0 |
+| STUB replay (agent-written, **not Apertus**) | main | 31/31 | 23/23 | 8/8 | 0 | 0 |
+| No-model baseline | held-out | 8/13 | 6/11 | 2/2 | 4 | 0 |
+| **Apertus 8B** | main | `[[REAL_RESULTS]]` | | | | |
+| **Apertus 8B** | held-out | `[[REAL_RESULTS]]` | | | | |
 
-INDEC cross-checks: 5/5 (baseline and STUB); Apertus `[[ ]]`.
-All rows above were reproduced inside the Docker image with `--network none` (Section 2.3).
+All rows reproduced in the Docker image with `--network none`; INDEC cross-checks 5/5.
+**Reading.** The rules router was written while looking at the main set, so its 31/31 is not blind; the held-out set is the
+fair comparison. Claim under test: *Apertus raises held-out coverage above the baseline's 8/13 while keeping grounding
+violations at 0.* STUB rows only show that pipeline, validators and fallbacks work; its four adversarial outputs (unknown
+series id, markdown-fenced plan, invented figure, banned word "récord") are all handled as designed.
 
-**How to read it.** The rules router was written while looking at the main set, so its 31/31 is **not a blind score**. The
-held-out set is the fair comparison, and the claim to test is: *Apertus improves held-out coverage over the rules
-baseline (8/13) while keeping grounding violations at 0.* The STUB rows only show that the pipeline, validators and
-fallbacks work. The STUB also contains four adversarial canned outputs: an unknown series id (rejected, rules fallback), a
-markdown-fenced plan (tolerated by the parser), a phrasing that invents a figure (rejected, template) and a phrasing that
-uses a banned word, "récord" (rejected, template). All four are handled as designed.
-**Error analysis:** `[[APERTUS_ERRORS: per-category breakdown, examples of plan errors caught vs passed, phrasing
-rejections]]`.
+[[REAL_RESULTS: error analysis ≈ 0.3 page — per-category breakdown; plan errors caught vs passed; phrasing rejections; optional 70B row]]
 
 ## 6. Limitations
 
-- **Coverage is fixed** at 47 series and tables. Unemployment, poverty and GDP are not included yet. The snapshot ends at
-  the latest data cached at build time (CPI to Aug 2026).
-- **Plausible but wrong plans.** A plan can pass validation and still answer a slightly different question (seen once in
-  13 held-out cases for the baseline). The figure is still real and cited, and the UI shows the series and period, but the
-  user has to notice. Plan–question consistency checks are planned.
-- **Spanish only** (Argentine usage); no multi-turn context.
-- **Real-model results pending** (`[[ ]]`). Self-hosted Apertus not tested (no GPU).
-- **Not tested:** load beyond a single user, accessibility audit of the UI.
+Fixed coverage (47 entries; no unemployment, poverty or GDP yet; CPI to Aug 2026). A valid but wrong plan can answer a
+slightly different question (1/13 held-out for the baseline); plan–question consistency checks are planned. Spanish only,
+single turn. Real-model results pending; self-hosted Apertus untested (no GPU); no load or accessibility testing.
 
 ## 7. Reproducibility
 
-From `track_2b/`: `make run` (UI at http://localhost:8080), `make test`, `make eval`, `make eval-heldout`,
-`make offline-proof`. STUB and off modes are deterministic: the reports in `docs/eval/` regenerate byte-identically.
-Verified on Docker Engine 29.8.2 (Linux x86-64), image based on `python:3.12-slim`, CPU only, no GPU. Hosts without Docker
-can use `make run-local` / `test-local` / `eval-local` (Python ≥ 3.10). Real runs: set `LLM_BASE_URL`, `LLM_NAME`,
-`LLM_API_KEY`, then `LLM_MODE=record make eval` (stores outputs for offline replay). Exact commit: `[[COMMIT]]`.
+From `track_2b/`: `make run` (UI at `http://localhost:8080`), `make test`, `make eval`, `make eval-heldout`,
+`make offline-proof`, `make report` (this PDF). STUB and off modes are deterministic: `docs/eval/` regenerates
+identically (apart from a timing field). Verified on Docker Engine 29.8.2, Linux x86-64, CPU only. Without Docker: `make run-local` /
+`test-local` / `eval-local` (Python ≥ 3.10). Real runs: set `LLM_BASE_URL`, `LLM_NAME`, `LLM_API_KEY`, then
+`LLM_MODE=record make eval`. Commit: `[[COMMIT]]`.
 
 ## 8. Next steps
 
 Real Apertus runs (8B, then 70B) with prompt iteration on the held-out set; plan–question consistency checks; more series
-(labour market, GDP, provincial data); a second statistics office (for example BFS / opendata.swiss) through the same
-catalog format, to show portability; a measured self-hosted Apertus deployment on an isolated GPU node.
+(labour market, GDP, provinces); a second statistics office (e.g. BFS / opendata.swiss) through the same catalog format; a
+measured self-hosted deployment on an isolated GPU node.
 
 ## 9. Disclosures
 
-- **AI-assisted development (plain statement).** This project was built with **closed-weights (proprietary) AI coding
-  agents**, directed and reviewed by the entrant. They wrote the code, tests, documentation and this report. They are not
-  part of the submitted system, are not called at runtime, and are not used for evaluation. The only runtime model is
-  Apertus. (The rules mention open-weights models used to support development; ours were closed-weights, so we state
-  their role here explicitly.)
-- **STUB.** Until real runs are recorded, the STUB replays outputs written by the build agent. It is labelled STUB in the
-  UI, the evaluation reports and this report.
-- **Reuse.** The LLM gateway was ported to Python from an earlier prototype by the same team, written on 2 Oct 2026.
-  Cached raw downloads and aggregation definitions come from the team's open-data pipeline (1–2 Oct 2026), re-verified at
-  build time. The template files come from `HackApertus/project-template` @ `7f23822`. Details: `docs/DISCLOSURE.md`.
-- **Data** is third-party CC BY 4.0 with attribution (Section 4).
+| Topic | Statement |
+|---|---|
+| AI-assisted development | Built with **closed-weights (proprietary) AI coding agents**, directed and reviewed by the entrant. They wrote the code, tests, docs and this report. They are not part of the submitted system, are not called at runtime, and are not used as judges. The only runtime model is Apertus. (The rules mention open-weights models supporting development; ours were closed-weights, so we state their role explicitly.) |
+| STUB outputs | Until real runs are recorded, the STUB replays outputs **written by the build agent**, labelled STUB in the UI, eval reports and this report. |
+| Component reuse | LLM gateway ported (JavaScript → Python) from the team's **Ciclo** prototype, written 2 Oct 2026; one change: invalid content no longer trips the breaker. Container/env-var/health pattern adapted from Ciclo. |
+| Data reuse | Raw downloads, licence evidence and aggregation definitions from the team's open-data pipeline (1–2 Oct 2026), re-verified at build time. |
+| Template | `HackApertus/project-template` @ `7f23822` (Apache-2.0). Details: `docs/DISCLOSURE.md`. |
+| Data licence | Third-party CC BY 4.0 with attribution (§4). |
 
 ## License
 
@@ -223,7 +172,6 @@ Data in `data/`: third-party, CC BY 4.0 (original publishers).
 
 ## References
 
-- Apertus v1.5 model card: huggingface.co/swiss-ai/Apertus-v1.5-8B
-- Series de Tiempo API (datos.gob.ar): datosgobar.github.io/series-tiempo-ar-api
-- INDEC, Índice de precios al consumidor (monthly technical reports), indec.gob.ar
-- Hack Apertus project template: github.com/HackApertus/project-template (commit `7f23822`)
+Apertus v1.5 model card (huggingface.co/swiss-ai/Apertus-v1.5-8B) · Series de Tiempo API, datos.gob.ar
+(datosgobar.github.io/series-tiempo-ar-api) · INDEC, Índice de precios al consumidor (indec.gob.ar) · Hack Apertus
+project template (github.com/HackApertus/project-template @ `7f23822`)
