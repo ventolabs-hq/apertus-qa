@@ -18,7 +18,7 @@
   "phrase_model": 0,
   "phrase_fallback": 23,
   "seconds": 0.01,
-  "snapshot": "2026-10-02T14:15:12+00:00"
+  "snapshot": "2026-10-02T14:20:15+00:00"
  },
  "rows": [
   {
@@ -349,7 +349,7 @@
   {
    "id": "vuelos_ruta_2025",
    "q": "¿Qué ruta de cabotaje tuvo más vuelos regulares en 2025?",
-   "answer": "Vuelos regulares de cabotaje por ruta (ambos sentidos), 2025: AER-CBA 10.497 vuelos; AER-DOZ 9.356 vuelos; AER-BAR 8.162 vuelos.",
+   "answer": "Vuelos regulares de cabotaje por ruta (ambos sentidos), 2025: Aeroparque–Córdoba (AER-CBA) 10.497 vuelos; Aeroparque–Mendoza (AER-DOZ) 9.356 vuelos; Aeroparque–Bariloche (AER-BAR) 8.162 vuelos.",
    "refused": false,
    "reason": null,
    "router": "fallback",

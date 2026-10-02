@@ -20,7 +20,7 @@
 | phrase_model | 0 |
 | phrase_fallback | 23 |
 | seconds | 0.01 |
-| snapshot | 2026-10-02T14:15:12+00:00 |
+| snapshot | 2026-10-02T14:20:15+00:00 |
 | set | main |
 
 | id | ok | decisión | valores | cita | router | redacción | respuesta |
@@ -45,7 +45,7 @@
 | subte_jun26 | ✔ | True | True | True | fallback (no_provider) | fallback (no_provider) | Pasajeros de subterráneo y premetro (CABA), junio de 2026: 16.895,3 miles de pasajeros. |
 | subte_total_2025 | ✔ | True | True | True | fallback (no_provider) | fallback (no_provider) | Pasajeros de subterráneo y premetro (CABA), total de 2025: 193.053,6 miles de pasajeros. |
 | nacimientos_2022 | ✔ | True | True | True | fallback (no_provider) | fallback (no_provider) | Nacidos vivos, total del país, 2022: 495.295 nacimientos. |
-| vuelos_ruta_2025 | ✔ | True | True | True | fallback (no_provider) | fallback (no_provider) | Vuelos regulares de cabotaje por ruta (ambos sentidos), 2025: AER-CBA 10.497 vuelos; AER-DOZ 9.356 vuelos; AER-BAR 8.162 vuelos. |
+| vuelos_ruta_2025 | ✔ | True | True | True | fallback (no_provider) | fallback (no_provider) | Vuelos regulares de cabotaje por ruta (ambos sentidos), 2025: Aeroparque–Córdoba (AER-CBA) 10.497 vuelos; Aeroparque–Mendoza (AER-DOZ) 9.356 |
 | viales_2024 | ✔ | True | True | True | fallback (no_provider) | fallback (no_provider) | Víctimas fatales de siniestros viales (Sistema de Alerta Temprana), 2024: 3.539 víctimas. |
 | viales_moto_2024 | ✔ | True | True | True | fallback (no_provider) | fallback (no_provider) | Víctimas fatales de siniestros viales por vehículo de la víctima, 2024: Motocicleta, 1.616 víctimas (2024). |
 | rechazo_nacimientos_2024 | ✔ | True | None | None | fallback (no_provider) | None | No tengo ese dato en el snapshot local: la serie «Nacidos vivos, total del país» cubre de 1914 a 2022. No invento cifras. |

@@ -20,7 +20,7 @@
 | phrase_model | 0 |
 | phrase_fallback | 7 |
 | seconds | 0.0 |
-| snapshot | 2026-10-02T14:15:12+00:00 |
+| snapshot | 2026-10-02T14:20:15+00:00 |
 | set | heldout |
 
 | id | ok | decisión | valores | cita | router | redacción | respuesta |
@@ -34,7 +34,7 @@
 | p_chile_ene26 | ✘ | False | False | False | fallback (no_provider) | None | No puedo responder eso con los datos de este sistema. Cubre: precios (IPC), salarios registrados, población, nacimientos, tipo de cambio anu |
 | p_ventas_ext_2023 | ✘ | False | False | False | fallback (no_provider) | None | No puedo responder eso con los datos de este sistema. Cubre: precios (IPC), salarios registrados, población, nacimientos, tipo de cambio anu |
 | p_solar_20_24 | ✔ | True | True | True | fallback (no_provider) | fallback (no_provider) | Potencia instalada solar (fin de año): variación de 120,4 % entre 2020 (759,0 MW) y 2024 (1.672,9 MW). |
-| p_aeropuerto_2025 | ✔ | True | True | True | fallback (no_provider) | fallback (no_provider) | Movimientos regulares (aterrizajes + despegues) por aeropuerto, 2025: AER 133.284 movimientos; EZE 69.901 movimientos; CBA 24.740 movimiento |
+| p_aeropuerto_2025 | ✔ | True | True | True | fallback (no_provider) | fallback (no_provider) | Movimientos regulares (aterrizajes + despegues) por aeropuerto, 2025: Aeroparque (AER) 133.284 movimientos; Ezeiza (EZE) 69.901 movimientos; |
 | p_sueldo_ajuste | ✘ | True | False | False | fallback (no_provider) | fallback (no_provider) | 2024: Índice de salarios, empleo registrado: variación anual diciembre a diciembre 137,7 %; Inflación anual diciembre a diciembre (IPC Nacio |
 | p_ahorrar | ✔ | True | None | None | fallback (no_provider) | None | No doy consejos de inversión, impuestos ni compras. Puedo informar datos oficiales publicados. |
 | p_dolar_2027 | ✔ | True | None | None | fallback (no_provider) | None | No hago pronósticos: solo informo datos oficiales ya publicados que están en el snapshot local. |

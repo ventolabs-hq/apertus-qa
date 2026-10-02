@@ -18,7 +18,7 @@
   "phrase_model": 0,
   "phrase_fallback": 7,
   "seconds": 0.0,
-  "snapshot": "2026-10-02T14:15:12+00:00"
+  "snapshot": "2026-10-02T14:20:15+00:00"
  },
  "rows": [
   {
@@ -168,7 +168,7 @@
   {
    "id": "p_aeropuerto_2025",
    "q": "¿Cuál fue el aeropuerto con más movimientos regulares en 2025?",
-   "answer": "Movimientos regulares (aterrizajes + despegues) por aeropuerto, 2025: AER 133.284 movimientos; EZE 69.901 movimientos; CBA 24.740 movimientos.",
+   "answer": "Movimientos regulares (aterrizajes + despegues) por aeropuerto, 2025: Aeroparque (AER) 133.284 movimientos; Ezeiza (EZE) 69.901 movimientos; Córdoba (CBA) 24.740 movimientos.",
    "refused": false,
    "reason": null,
    "router": "fallback",
