@@ -6,6 +6,9 @@ PORT    ?= 8080
 DOCKER  ?= docker
 PYTHON  ?= python3
 LLM_MODE ?=
+# How `make run` publishes the UI. Default: normal Docker port mapping. On hosts whose daemon runs with
+# --bridge=none (e.g. our build box), use: make run RUN_NET="--network host -e HOST=127.0.0.1"
+RUN_NET ?= -p $(PORT):8080
 -include .env
 export LLM_NAME LLM_BASE_URL LLM_API_KEY LLM_MODE LLM_JSON_MODE LLM_TIMEOUT_S
 ENV_FLAGS = -e LLM_NAME -e LLM_BASE_URL -e LLM_API_KEY -e LLM_MODE -e LLM_JSON_MODE -e LLM_TIMEOUT_S
@@ -13,10 +16,10 @@ ENV_FLAGS = -e LLM_NAME -e LLM_BASE_URL -e LLM_API_KEY -e LLM_MODE -e LLM_JSON_M
 NET_EVAL = $(if $(filter real record,$(LLM_MODE)),,--network none)
 EVAL_MODE = $(if $(LLM_MODE),$(LLM_MODE),stub)
 
-.PHONY: run build test eval eval-heldout run-local test-local eval-local snapshot image-save help check-docker
+.PHONY: offline-proof run build test eval eval-heldout run-local test-local eval-local snapshot image-save help check-docker
 
 help:
-	@echo "make run | test | eval | eval-heldout   (Docker)"
+	@echo "make run | test | eval | eval-heldout | offline-proof   (Docker)"
 	@echo "make run-local | test-local | eval-local (host Python >= 3.10, no Docker)"
 	@echo "make image-save  -> apertus-qa.tar for air-gapped transfer (docker load -i apertus-qa.tar)"
 
@@ -24,10 +27,10 @@ check-docker:
 	@command -v $(DOCKER) >/dev/null 2>&1 || { echo "Docker not found. Install Docker, or use 'make run-local' (Python >= 3.10)."; exit 1; }
 
 build: check-docker
-	$(DOCKER) build -t $(IMAGE) .
+	$(DOCKER) build --network none -t $(IMAGE) .   # RUN steps need no network (stdlib only)
 
 run: build
-	$(DOCKER) run --rm -p $(PORT):8080 $(ENV_FLAGS) $(IMAGE)
+	$(DOCKER) run --rm $(RUN_NET) $(ENV_FLAGS) $(IMAGE)
 
 test: build
 	$(DOCKER) run --rm --network none $(IMAGE) python -m unittest discover -s tests -t . -v
@@ -39,6 +42,10 @@ eval: build
 eval-heldout: build
 	$(DOCKER) run --rm $(NET_EVAL) $(ENV_FLAGS) -v "$(CURDIR)/docs/eval:/app/docs/eval" --user "$$(id -u):$$(id -g)" \
 	  $(IMAGE) python -m eval.run_eval --mode $(EVAL_MODE) --set heldout
+
+# Air-gap proof: interfaces, blocked egress/DNS, app + tests + evals under --network none, model-call fallback
+offline-proof: build
+	IMAGE=$(IMAGE) bash scripts/offline_proof.sh
 
 image-save: build
 	$(DOCKER) save $(IMAGE) -o apertus-qa.tar

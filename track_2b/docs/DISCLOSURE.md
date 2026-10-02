@@ -22,9 +22,18 @@
 ## Third-party material
 - `LICENSE`, `.gitignore`, `track_2b/README.md`, `track_2b/technical_report.md` skeleton and `track_2b/Makefile` skeleton come
   from `HackApertus/project-template` at commit `7f23822` (Apache-2.0), fetched as a tarball through the GitHub REST API.
-- Data: CC BY 4.0, see `docs/DATA.md` for per-dataset attribution.
+- Data: third-party, CC BY 4.0, redistributed with attribution and not relicensed. See `data/README.md` and `docs/DATA.md`.
 
-## AI assistance
-The code, tests and documents were produced by AI coding agents directed by the entrant. The **runtime** model is Apertus
-(via `LLM_BASE_URL`). No other model is used at runtime. Until the CSCS key is available, tests and evaluation use a **STUB**
-that replays outputs **written by the build agent** (they are not real Apertus outputs and are labelled STUB everywhere).
+## AI assistance (plain disclosure)
+**Closed-weights (proprietary) AI coding agents were used to build this project.** They wrote the code, tests,
+documentation and this report, directed and reviewed by the entrant. They are development tools only. They are not part of
+the submitted system, they are not called at runtime, and they are not used as evaluation judges.
+
+- **Runtime model:** Apertus only (via `LLM_BASE_URL`, `LLM_NAME`). No other model is used at runtime.
+- **Evaluation:** deterministic scoring code (`src/eval/run_eval.py`) against expected answers computed from the data. No
+  LLM judge is used.
+- **STUB mode:** until the CSCS key is available, tests and evaluation use a **STUB** that replays outputs **written by the
+  build agent**. They are not Apertus outputs and are labelled STUB everywhere (UI, eval reports, technical report).
+- Rule context: the rules allow "other open-weights models … to support development" and ask that their role be described.
+  The coding agents we used are closed-weights, so we describe their role here and in the technical report rather than leave
+  any doubt.

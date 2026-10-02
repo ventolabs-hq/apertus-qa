@@ -1,6 +1,6 @@
 # Apertus QA — grounded Spanish Q&A over official statistics
 
-Hack Apertus 2026 · **Track 2B — Own project** · project root: [`track_2b/`](track_2b/)
+Hack Apertus 2026 · **Track 2B — Own project** · team **Vento Labs** · project root: [`track_2b/`](track_2b/)
 
 Ask in Spanish ("¿Cuál fue la inflación mensual de agosto de 2026?") and get a one-sentence answer where **every number
 comes from a verified local snapshot of official open data** (INDEC and other agencies via datos.gob.ar, CC BY 4.0), with
@@ -12,6 +12,7 @@ cd track_2b
 make run            # Docker; then open http://localhost:8080
 make test           # offline unit + integration tests (container runs with --network none)
 make eval           # scores grounded answers on 31 Spanish questions (+ `make eval-heldout`, 13 paraphrases)
+make offline-proof  # shows everything works under `docker run --network none` (only the model call needs a network)
 ```
 
 Model configuration (template convention): `LLM_NAME`, `LLM_BASE_URL`, `LLM_API_KEY` — any OpenAI-compatible endpoint
@@ -23,5 +24,5 @@ Model configuration (template convention): `LLM_NAME`, `LLM_BASE_URL`, `LLM_API_
 - Reuse and AI-assistance disclosure: [`track_2b/docs/DISCLOSURE.md`](track_2b/docs/DISCLOSURE.md)
 
 Created from [`HackApertus/project-template`](https://github.com/HackApertus/project-template) (commit `7f23822`); the
-other track directories were deleted as the template instructs. Code: Apache-2.0 (`LICENSE`). Docs: CC-BY-4.0. Data: CC BY 4.0
-from the original publishers (attribution in `docs/DATA.md`).
+other track directories were deleted as the template instructs. Code: Apache-2.0 (`LICENSE`). Docs: CC-BY-4.0. `track_2b/data/` is
+**third-party data** under CC BY 4.0 from the original publishers (not relicensed by us; attribution in `docs/DATA.md`).
