@@ -1,60 +1,27 @@
-# Hack Apertus — project template
+# Apertus QA — grounded Spanish Q&A over official statistics
 
-Template repository for [Hack Apertus](https://hackapertus.ch/) submissions.
-Every project keeps almost the same layout, so organizers and judges find the
-same things in the same place.
+Hack Apertus 2026 · **Track 2B — Own project** · project root: [`track_2b/`](track_2b/)
 
-## Select your track
-
-This repository holds one example project per track:
-
-- `track_1a/`
-- `track_1b/`
-- `track_2a/`
-- `track_2b/`
-
-Keep the directory for the track you are competing in **exactly as it is** —
-don't rename it or move its files — and delete the other track directories.
-That directory is your project root. Keep the files and directories as shown
-below.
-
-## The structure
-
-| Path | What it is |
-| --- | --- |
-| `README.md` | The challenge description and submission requirements for your track |
-| `technical_report.md` | The deeper write-up: architecture, evaluation, limitations |
-| `Makefile` | `make run` must spin up your project |
-| `src/` | Your code |
-| `data/` | Datasets — `track_1a`, `track_2a` and `track_2b` only; max. 100 MB |
-| `findings/` | Issue files — `track_1a` only |
-| `docs/` | Diagrams, notes, longer write-ups |
-
-## Run it
-
-Judges run `make run` from the root of the project, on a clean checkout:
+Ask in Spanish ("¿Cuál fue la inflación mensual de agosto de 2026?") and get a one-sentence answer where **every number
+comes from a verified local snapshot of official open data** (INDEC and other agencies via datos.gob.ar, CC BY 4.0), with
+the series id, period and licence cited. Apertus plans the query and phrases the answer; it never produces or even sees a
+figure. If the snapshot can't answer, it says so.
 
 ```bash
-make run
+cd track_2b
+make run            # Docker; then open http://localhost:8080
+make test           # offline unit + integration tests (container runs with --network none)
+make eval           # scores grounded answers on 31 Spanish questions (+ `make eval-heldout`, 13 paraphrases)
 ```
 
-`make run` is expected to run the project using Docker, since that
-is how the judges will run it.
-- If you used other local open-weight models, include instructions for running the project in your technical report.
-- Use the following environment variables:
-```
-LLM_NAME — name and version of the model
-LLM_BASE_URL — endpoint base URL
-LLM_API_KEY — your API key
-```
+Model configuration (template convention): `LLM_NAME`, `LLM_BASE_URL`, `LLM_API_KEY` — any OpenAI-compatible endpoint
+(CSCS-hosted Apertus, or self-hosted vLLM/Ollama). Without them the app runs in clearly labelled **STUB** mode.
 
-## Getting started
+- Architecture, evaluation, limitations: [`track_2b/technical_report.md`](track_2b/technical_report.md)
+- Air-gapped / sovereign deployment: [`track_2b/docs/OFFLINE.md`](track_2b/docs/OFFLINE.md)
+- Data sources and licences: [`track_2b/docs/DATA.md`](track_2b/docs/DATA.md)
+- Reuse and AI-assistance disclosure: [`track_2b/docs/DISCLOSURE.md`](track_2b/docs/DISCLOSURE.md)
 
-1. Click **Use this template** to create your own repository.
-2. Delete the other track directories. Don't rename or restructure yours.
-3. Read its `README.md` and fill in `technical_report.md`.
-4. Make `make run` work from the root of the project, on a clean checkout.
-
-## License
-
-All Hack Apertus projects are open-sourced. Please check our Terms & Conditions for specific licensing details (6. What you build is open source): https://hackapertus.ch/terms-and-conditions
+Created from [`HackApertus/project-template`](https://github.com/HackApertus/project-template) (commit `7f23822`); the
+other track directories were deleted as the template instructs. Code: Apache-2.0 (`LICENSE`). Docs: CC-BY-4.0. Data: CC BY 4.0
+from the original publishers (attribution in `docs/DATA.md`).

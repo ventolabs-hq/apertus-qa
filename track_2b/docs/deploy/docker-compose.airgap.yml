@@ -1,0 +1,27 @@
+# UNTESTED EXAMPLE (no GPU/Docker on the dev machine yet). Self-hosted Apertus + this app on an internal-only network.
+# Pre-download the weights (gated model: accept its terms on Hugging Face first) into ./models/Apertus-v1.5-8B.
+services:
+  apertus:
+    image: vllm/vllm-openai:latest          # pin a digest before real use
+    command: ["--model", "/models/Apertus-v1.5-8B", "--served-model-name", "swiss-ai/Apertus-v1.5-8B", "--max-model-len", "8192"]
+    environment:
+      HF_HUB_OFFLINE: "1"
+    volumes:
+      - ./models:/models:ro
+    deploy:
+      resources:
+        reservations:
+          devices: [{driver: nvidia, count: 1, capabilities: [gpu]}]
+    networks: [airgap]
+  app:
+    image: apertus-qa:local
+    environment:
+      LLM_NAME: swiss-ai/Apertus-v1.5-8B
+      LLM_BASE_URL: http://apertus:8000/v1
+      LLM_MODE: real
+    networks: [airgap, lan]
+    ports: ["8080:8080"]
+networks:
+  airgap:
+    internal: true      # no route to the internet
+  lan: {}
