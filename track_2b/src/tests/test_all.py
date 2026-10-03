@@ -357,6 +357,9 @@ class TestServer(unittest.TestCase):
         try:
             html = urllib.request.urlopen(base + "/").read().decode()
             self.assertNotRegex(html, r'(src|href)="https?://')      # no external assets (air-gapped UI)
+            self.assertIn('id="stubBanner"', html)                   # DEMO STUB banner present in markup
+            self.assertIn("STUB DEMO", html)                         # STUB label readable even before JS
+            self.assertNotIn("https://", html.split("<script>")[0])  # no external refs in head/body chrome
             h = json.loads(urllib.request.urlopen(base + "/health").read())
             self.assertEqual(h["model_mode"], "stub")
             req = urllib.request.Request(base + "/api/ask", data=json.dumps({"q": "¿Cuántos nacimientos hubo en Argentina en 2022?"}).encode(),

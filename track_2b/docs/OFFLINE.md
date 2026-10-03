@@ -16,7 +16,7 @@ porque la imagen no depende de ningún servicio externo.
 ## Modos (`LLM_MODE`)
 
 - `real`: endpoint OpenAI-compatible definido por `LLM_NAME`, `LLM_BASE_URL`, `LLM_API_KEY` (la clave es opcional para servidores locales).
-- `stub`: repite salidas grabadas (`src/apertus_qa/stub/`); determinístico, sin red. Se etiqueta **STUB** en la UI y en la evaluación.
+- `stub`: repite salidas grabadas (`src/apertus_qa/stub/`); determinístico, sin red. Se etiqueta **STUB** en la UI (banner superior + badges) y en la evaluación (`STUB (canned replay, not real Apertus)`).
 - `record`: como `real`, y además guarda las salidas del modelo en `stub/recorded.json`, para que un jurado sin clave pueda reproducir una corrida real sin red.
 - `off`: sin modelo (reglas + plantillas). Es el modo "sin conexión total".
 
@@ -32,11 +32,11 @@ hay que aceptar sus condiciones), GPU con memoria suficiente para el 8B, o una v
 Los datos se actualizan **fuera** del sitio aislado: `make snapshot` (mantenedores) regenera `data/snapshot/` desde descargas
 crudas verificadas; se reconstruye la imagen y se transfiere. El sitio nunca descarga nada.
 
-## Prueba verificada: todo funciona con `--network none` (2 oct 2026)
+## Prueba verificada: todo funciona con `--network none` (3 oct 2026; re-verificado tras polish STUB DEMO)
 
 Entorno: Docker Engine 29.8.2 (Debian 13, x86-64), imagen `apertus-qa:local` construida con
 `docker build --no-cache --network none -t apertus-qa:local .` (7 pasos OK; la única descarga es la imagen base, que hace
-el daemon, no el contenedor). Reproducir con **`make offline-proof`** (script: `scripts/offline_proof.sh`).
+el daemon, no el contenedor). Reproducir con **`make offline-proof`** (script: `scripts/offline_proof.sh`; falla si algún paso no cumple: solo `lo`, egress/DNS bloqueados, banner STUB en la UI, 35 tests, evals con 0 grounding violations).
 
 Qué demuestra:
 1. Dentro del contenedor solo existe la interfaz `lo`.
@@ -53,7 +53,7 @@ Salida literal de `make offline-proof`:
 $ docker version --format 'client {{.Client.Version}} / server {{.Server.Version}}'
 client 29.8.2 / server 29.8.2
 $ docker image inspect apertus-qa:local --format '{{.Id}}'
-sha256:128c718ec87ee6e7ee8c7e659355fd6224cccfffb21f7caa34b6db51d5317ebb
+sha256:206e98232ae16b33651b284fd616002690c58347a7d679341ca07c9459e91cd9
 
 ## 1. Interfaces inside a --network none container (only loopback expected)
 $ docker run --rm --network none apertus-qa:local python -c "import socket;print(sorted(n for _,n in socket.if_nameindex()))"
@@ -75,6 +75,8 @@ Q: ¿Cuál fue la inflación mensual de agosto de 2026?
 Q: ¿Cuál será el dólar blue en diciembre?
   refused: True | answer: No hago pronósticos: solo informo datos oficiales ya publicados que están en el snapshot local.
   cite: -
+$ docker exec aqa-offline python -c '<check STUB banner marker in UI HTML>'
+UI STUB banner marker: OK
 $ docker inspect aqa-offline --format '{{.HostConfig.NetworkMode}}'
 none
 
