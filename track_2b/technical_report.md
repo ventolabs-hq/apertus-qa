@@ -75,7 +75,7 @@ shows series and period next to every answer so users can spot it.
 
 **Air-gap proof** (`make offline-proof`; full transcript in `docs/OFFLINE.md`). Under `--network none` only `lo` exists;
 connections to `1.1.1.1:443` / `8.8.8.8:53` fail (`Network is unreachable`) and DNS fails; the server answers `/health`
-and `/api/ask` inside the container; 40 tests and all four STUB/off eval runs pass with unchanged scores; in `real` mode the trace
+and `/api/ask` inside the container; 41 tests and all four STUB/off eval runs pass with unchanged scores; in `real` mode the trace
 shows `fallback (network_error)` and the answer is still correct and cited — the model call is the only network dependency.
 `docs/deploy/docker-compose.airgap.yml` sketches app + vLLM with local Apertus weights on an `internal: true` network
 (not run: no GPU).

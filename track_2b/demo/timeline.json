@@ -1,0 +1,775 @@
+{
+ "timeline": [
+  {
+   "f": "f0000.png",
+   "sec": 4,
+   "caption": "Apertus QA — live Apertus v1.5-70B on the CSCS endpoint"
+  },
+  {
+   "f": "f0001.png",
+   "sec": 4,
+   "caption": "Team Vento Labs · Hack Apertus 2026 · Track 2B"
+  },
+  {
+   "f": "f0002.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0003.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0004.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0005.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0006.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0007.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0008.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0009.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0010.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0011.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0012.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0013.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0014.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0015.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0016.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0017.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0018.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0019.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0020.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0021.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0022.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0023.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0024.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0025.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0026.png",
+   "sec": 3,
+   "caption": "Q: \"What was monthly inflation in August 2026?\""
+  },
+  {
+   "f": "f0027.png",
+   "sec": 6,
+   "caption": "A: 1.7% vs July 2026, with source, series id, period and licence"
+  },
+  {
+   "f": "f0028.png",
+   "sec": 5,
+   "caption": "Every number comes from a verified local snapshot (INDEC, CC BY 4.0)"
+  },
+  {
+   "f": "f0029.png",
+   "sec": 7,
+   "caption": "Apertus picks the series and the operation (a JSON plan)…"
+  },
+  {
+   "f": "f0030.png",
+   "sec": 9,
+   "caption": "Model text rejected by a validator → safe template. No invented numbers."
+  },
+  {
+   "f": "f0031.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0032.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0033.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0034.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0035.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0036.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0037.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0038.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0039.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0040.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0041.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0042.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0043.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0044.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0045.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0046.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0047.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0048.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0049.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0050.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0051.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0052.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0053.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0054.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0055.png",
+   "sec": 3,
+   "caption": "Q: \"What are 1,000 pesos of January 2020 worth today?\""
+  },
+  {
+   "f": "f0056.png",
+   "sec": 7,
+   "caption": "Inflation adjustment computed by code, not by the model, and cited"
+  },
+  {
+   "f": "f0057.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0058.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0059.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0060.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0061.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0062.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0063.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0064.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0065.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0066.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0067.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0068.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0069.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0070.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0071.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0072.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0073.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0074.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0075.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0076.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0077.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0078.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0079.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0080.png",
+   "sec": 0.08333333333333333,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0081.png",
+   "sec": 2,
+   "caption": "Q: \"How many people lived in the country in 2015?\""
+  },
+  {
+   "f": "f0082.png",
+   "sec": 6,
+   "caption": "Rules alone can't parse this paraphrase; Apertus maps it to the population series"
+  },
+  {
+   "f": "f0083.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0084.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0085.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0086.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0087.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0088.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0089.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0090.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0091.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0092.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0093.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0094.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0095.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0096.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0097.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0098.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0099.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0100.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0101.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0102.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0103.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0104.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0105.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0106.png",
+   "sec": 0.0625,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0107.png",
+   "sec": 3.5,
+   "caption": "Q: \"What will inflation be in December 2026?\" → no forecasts"
+  },
+  {
+   "f": "f0108.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0109.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0110.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0111.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0112.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0113.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0114.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0115.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0116.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0117.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0118.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0119.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0120.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0121.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0122.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0123.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0124.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0125.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0126.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0127.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0128.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0129.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0130.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0131.png",
+   "sec": 0.041666666666666664,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0132.png",
+   "sec": 4,
+   "caption": "Q: \"Should I buy dollars?\" → no financial advice"
+  },
+  {
+   "f": "f0133.png",
+   "sec": 2.5,
+   "caption": "Air-gapped: the container runs with no network at all (--network none)"
+  },
+  {
+   "f": "f0134.png",
+   "sec": 2.5,
+   "caption": "Air-gapped: the container runs with no network at all (--network none)"
+  },
+  {
+   "f": "f0135.png",
+   "sec": 2.5,
+   "caption": "No internet, no DNS: only the loopback interface"
+  },
+  {
+   "f": "f0136.png",
+   "sec": 2.5,
+   "caption": "No internet, no DNS: only the loopback interface"
+  },
+  {
+   "f": "f0137.png",
+   "sec": 2.5,
+   "caption": "App, 41 tests and the full evaluation still pass offline"
+  },
+  {
+   "f": "f0138.png",
+   "sec": 2.5,
+   "caption": "App, 41 tests and the full evaluation still pass offline"
+  },
+  {
+   "f": "f0139.png",
+   "sec": 2.5,
+   "caption": "Recorded real outputs replay offline too (LLM_MODE=replay)"
+  },
+  {
+   "f": "f0140.png",
+   "sec": 2.5,
+   "caption": "Recorded real outputs replay offline too (LLM_MODE=replay)"
+  },
+  {
+   "f": "f0141.png",
+   "sec": 6,
+   "caption": "Apertus v1.5-70B: 30/31 main · 12/13 held-out (rules alone: 8/13) · 0 invented numbers"
+  },
+  {
+   "f": "f0142.png",
+   "sec": 6,
+   "caption": "~2.5 s per question · air-gapped by design: point LLM_* at a self-hosted Apertus"
+  },
+  {
+   "f": "f0143.png",
+   "sec": 8,
+   "caption": "Open source · Apache-2.0 · Data CC BY 4.0"
+  }
+ ],
+ "app": "http://127.0.0.1:8080",
+ "answers": [
+  {
+   "answer": "IPC Nivel General Nacional (base dic-2016 = 100): variación mensual de 1,7 % en agosto de 2026 (respecto de julio de 2026).",
+   "cite": "Fuente: Instituto Nacional de Estadística y Censos (INDEC) — IPC Nivel General Nacional (base dic-2016 = 100) (serie 148.3_INIVELNAL_DICI_M_26), julio de 2026 a agosto de 2026. Licencia CC BY 4.0, vía datos.gob.ar.",
+   "modes": "planificación: llmredacción: fallback (invalid:digits_in_text)",
+   "ms": 3170,
+   "q": "¿Cuál fue la inflación mensual de agosto de 2026?"
+  },
+  {
+   "answer": "$ 1.000,00 de enero de 2020 equivalen a $ 42.358,52 de agosto de 2026, según el IPC (inflación acumulada: 4.135,9 %).",
+   "cite": "Fuente: Instituto Nacional de Estadística y Censos (INDEC) — IPC Nivel General Nacional (base dic-2016 = 100) (serie 148.3_INIVELNAL_DICI_M_26), enero de 2020 a agosto de 2026. Licencia CC BY 4.0, vía datos.gob.ar.",
+   "modes": "planificación: llmredacción: fallback (invalid:digits_in_text)",
+   "ms": 3359,
+   "q": "¿Cuánto equivalen hoy 1.000 pesos de enero de 2020?"
+  },
+  {
+   "answer": "En 2015 el país tenía 43.131.966 habitantes.",
+   "cite": "Fuente: Instituto Nacional de Estadística y Censos (INDEC) y Secretaría de Política Económica, Ministerio de Economía — Población de Argentina (serie 9.1_POB_2004_A_9), 2015. Licencia CC BY 4.0, vía datos.gob.ar.",
+   "modes": "planificación: llmredacción: llm",
+   "ms": 2545,
+   "q": "¿Cuánta gente vivía en el país en 2015?"
+  },
+  {
+   "answer": "No hago pronósticos: solo informo datos oficiales ya publicados que están en el snapshot local.",
+   "cite": "",
+   "modes": "planificación: llm",
+   "ms": 1423,
+   "q": "¿Cuál será la inflación de diciembre de 2026?"
+  },
+  {
+   "answer": "No doy consejos de inversión, impuestos ni compras. Puedo informar datos oficiales publicados.",
+   "cite": "",
+   "modes": "planificación: llm",
+   "ms": 1422,
+   "q": "¿Conviene comprar dólares?"
+  }
+ ],
+ "badge": "modelo: swiss-ai/Apertus-v1.5-70Bsnapshot 2026-10-0247 series/tablassin internet salvo el modelo",
+ "eval": {
+  "main": 30,
+  "heldout": 12,
+  "gm": 0,
+  "gh": 0,
+  "p50": [
+   2515,
+   2430
+  ],
+  "model": "swiss-ai/Apertus-v1.5-70B"
+ },
+ "total_s": 112.00000000000024
+}

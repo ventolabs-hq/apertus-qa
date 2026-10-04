@@ -58,7 +58,7 @@ terminal with a large font. Hide bookmarks, tabs and notifications; show no pers
 13 1:11.0 → 1:16.0  Q: "Should I buy dollars?" → no financial advice
 14 1:16.0 → 1:24.0  Air-gapped: the container runs with no network at all (--network none)
 15 1:24.0 → 1:30.0  No internet, no DNS: only the loopback interface
-16 1:30.0 → 1:36.0  App, 40 tests and the full evaluation still pass offline
+16 1:30.0 → 1:36.0  App, 41 tests and the full evaluation still pass offline
 17 1:36.0 → 1:42.0  STUB eval (not Apertus): 31/31 main · 8/13 held-out · 0 invented numbers
 18 1:42.0 → 1:48.0  Real Apertus is a drop-in later: point LLM_* at CSCS or self-hosted
 19 1:48.0 → 1:56.0  Open source · Apache-2.0 · Data CC BY 4.0 · STUB DEMO · [[REPO_URL]]
@@ -77,7 +77,7 @@ Notes:
 - [ ] Top STUB banner visible at 1920×1080 without cropping
 - [ ] Yellow STUB model badge + per-answer STUB tag visible on shots 2–6
 - [ ] Expanded details show `planificación: stub` / `redacción: stub` (not `llm`)
-- [ ] Shot 7: `make offline-proof` completes; only `lo`; egress/DNS fail; 40 tests OK
+- [ ] Shot 7: `make offline-proof` completes; only `lo`; egress/DNS fail; 41 tests OK
 - [ ] Shot 8: on-screen text says STUB / not real Apertus; figures match `docs/eval/eval_*_stub.md`
 - [ ] No secrets, no `.env`, no personal identifiers, no invented live-Apertus claims
 - [ ] Captions match the STUB script above; title/end cards say STUB DEMO
@@ -119,7 +119,7 @@ Caption changes (all others as in the STUB script; drop "STUB DEMO" from 1 and 1
 10 0:54.0 → 1:00.0  Q: "How many people lived in the country in 2015?"
 11 1:00.0 → 1:06.0  Rules alone can't parse this paraphrase; Apertus maps it to the population series
 17 1:36.0 → 1:42.0  Apertus v1.5-70B: 30/31 main · 12/13 held-out (rules alone: 8/13) · 0 invented numbers
-18 1:42.0 → 1:48.0  ~2.5 s per question · same app runs air-gapped with a self-hosted Apertus
+18 1:42.0 → 1:48.0  ~2.5 s per question · air-gapped by design: point LLM_* at a self-hosted Apertus
 ```
 Caption 11 must match what the take shows (population figure + citation). Caption 17/18 numbers: main `overall_ok` 30,
 held-out `overall_ok` 12, `grounding_violations` 0 in both; median latency 2.5 s over all 44 questions.
@@ -129,3 +129,8 @@ Real-cut readiness checklist:
 - [ ] Dry run of every on-screen question just before the take; answers match the plan above
 - [ ] No STUB labels claimed on the real cut, and no real-model claims on the STUB cut
 - [ ] Leak check on the final video frames (OCR) → PASS before upload
+
+### Recorded take (2026-10-04 09:57 ART)
+`demo/apertus-qa-demo.mp4`: 112.0 s, sha256 `38ec7372…c6ea01`. Recorded headlessly with `scripts/record_demo.mjs`
+using the shot order above; timings were compressed to 1:52 (see `demo/timeline.json`). Live answers matched the plan;
+caption 7b was shown. The leak checks (frame OCR, MP4 scan, audio transcript) are listed in `demo/README.md`.
