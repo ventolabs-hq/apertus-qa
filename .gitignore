@@ -25,3 +25,21 @@ build/
 .DS_Store
 .idea/
 .vscode/
+
+# Never commit env files, keys, logs or raw request/response dumps (they can carry headers, URLs or tokens)
+*.env
+env.txt
+*_env.txt
+*.env.txt
+secrets/
+*.key
+*.pem
+*api_key*
+*.log
+logs/
+*.har
+raw/
+*.raw.json
+*_raw.json
+docs/eval/raw/
+apertus-qa.tar
