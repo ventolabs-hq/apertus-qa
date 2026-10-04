@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estadísticas oficiales — preguntas y respuestas</title>
+<style>
+ :root{--bg:#f6f5f1;--fg:#1d1d1b;--mut:#6b6b66;--acc:#b3261e;--card:#fff;--line:#deddd6;--stub:#7a4d00;--stubbg:#fff3cd}
+ *{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--fg)}
+ main{max-width:820px;margin:0 auto;padding:28px 18px 60px}
+ h1{font-size:1.5rem;margin:0 0 4px} .sub{color:var(--mut);margin:0 0 18px}
+ form{display:flex;gap:8px} input{flex:1;padding:12px 14px;font-size:1rem;border:1px solid var(--line);border-radius:8px}
+ button{padding:12px 18px;font-size:1rem;border:0;border-radius:8px;background:var(--fg);color:#fff;cursor:pointer}
+ .ex{margin:10px 0 22px;display:flex;flex-wrap:wrap;gap:6px} .ex a{font-size:.85rem;padding:4px 10px;border:1px solid var(--line);border-radius:99px;color:var(--fg);text-decoration:none;background:var(--card)}
+ .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:14px}
+ .ans{font-size:1.15rem} .ref{border-left:4px solid var(--acc)} .cite{color:var(--mut);font-size:.85rem;margin-top:10px}
+ table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:10px} td,th{border-top:1px solid var(--line);padding:4px 6px;text-align:left}
+ .badge{display:inline-block;font-size:.75rem;padding:2px 8px;border-radius:99px;background:#ecebe5;color:var(--mut);margin-right:4px}
+ .badge.stub{background:var(--stubbg);color:var(--stub);font-weight:600}
+ details{margin-top:8px;font-size:.8rem;color:var(--mut)} pre{white-space:pre-wrap;word-break:break-word}
+ footer{color:var(--mut);font-size:.8rem;margin-top:30px}
+ /* DEMO STUB: visible in every screen-capture shot when LLM_MODE=stub. Hidden otherwise. */
+ #stubBanner{display:none;background:var(--stubbg);color:var(--stub);border-bottom:2px solid #e0c56a;padding:8px 18px;font-size:.9rem;font-weight:600;text-align:center}
+ #stubBanner[data-show="1"]{display:block}
+</style>
+</head>
+<body>
+<!-- DEMO STUB readiness: banner below is shown only when /health.model_mode === "stub". Never claim real Apertus. -->
+<div id="stubBanner" role="status" aria-live="polite">STUB DEMO — respuestas grabadas por el agente de build · NO es salida real de Apertus · sin clave CSCS</div>
+<main>
+ <h1>Preguntale a las estadísticas oficiales</h1>
+ <p class="sub">Respuestas en español con datos de INDEC y datos.gob.ar. Cada cifra sale de un snapshot local verificado y se cita con su serie y período. Si el dato no está, lo dice.</p>
+ <form id="f"><input id="q" autocomplete="off" placeholder="¿Cuál fue la inflación mensual de agosto de 2026?" maxlength="300"><button>Preguntar</button></form>
+ <div class="ex" id="ex"></div>
+ <div id="out"></div>
+ <p id="st" class="sub"></p>
+ <footer id="ft">Fuentes: INDEC y otros organismos vía datos.gob.ar, licencia CC BY 4.0. Datos, no asesoramiento financiero ni impositivo.</footer>
+</main>
+<script>
+const EX=["¿Cuál fue la inflación mensual de agosto de 2026?","¿Cuánto equivalen hoy 1.000 pesos de enero de 2020?","¿Le ganaron los salarios registrados a la inflación en 2025?","¿Qué ruta de cabotaje tuvo más vuelos regulares en 2025?","¿Cuántos nacimientos hubo en 2024?","¿Cuál será la inflación de diciembre de 2026?"];
+const $=s=>document.querySelector(s), esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
+let MODEL_MODE="unknown";
+// Gateway uses mode "llm" when any provider (including STUB replay) succeeds. Remap for display so STUB demos never look like live Apertus.
+function stepLabel(mode){
+  if(MODEL_MODE==="stub" && mode==="llm") return "stub";
+  if(MODEL_MODE==="off" && mode==="llm") return "off";
+  if(MODEL_MODE==="replay" && mode==="llm") return "replay";
+  return mode||"?";
+}
+EX.forEach(e=>{const a=document.createElement("a");a.href="#";a.textContent=e;a.onclick=ev=>{ev.preventDefault();$("#q").value=e;ask()};$("#ex").appendChild(a)});
+fetch("/health").then(r=>r.json()).then(h=>{
+  MODEL_MODE=h.model_mode||"unknown";
+  const stub=MODEL_MODE==="stub";
+  $("#stubBanner").dataset.show=stub?"1":"0";
+  const modeBadge=stub
+    ?`<span class="badge stub">modelo: STUB (respuestas grabadas · NO Apertus)</span>`
+    :MODEL_MODE==="off"
+      ?`<span class="badge">modelo: sin modelo (reglas)</span>`
+    :MODEL_MODE==="replay"
+      ?`<span class="badge">modelo: REPLAY · salidas reales grabadas de ${esc(h.model||"Apertus")} (sin llamada al modelo)</span>`
+      :`<span class="badge">modelo: ${esc(h.model||MODEL_MODE)}</span>`;
+  $("#st").innerHTML=`${modeBadge}<span class="badge">snapshot ${esc((h.snapshot||"").slice(0,10))}</span><span class="badge">${h.entries} series/tablas</span><span class="badge">sin internet salvo el modelo</span>`;
+});
+async function ask(){const q=$("#q").value.trim(); if(!q) return; $("#out").innerHTML='<div class="card">…</div>';
+ const r=await fetch("/api/ask",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({q})}); const a=await r.json();
+ const figs=a.figures.length?`<table><tr><th>cifra</th><th>valor</th><th>serie</th><th>período</th></tr>${a.figures.map(f=>`<tr><td>${esc(f.label)}</td><td>${esc(f.text)}</td><td><code>${esc(f.series_id||"pregunta")}</code></td><td>${esc(f.period)}</td></tr>`).join("")}</table>`:"";
+ const tr=a.trace||{};
+ const rMode=stepLabel(tr.router?.mode), pMode=tr.phrase?stepLabel(tr.phrase.mode):null;
+ const stubClass=MODEL_MODE==="stub"?" stub":"";
+ const modes=`<span class="badge${stubClass}">planificación: ${esc(rMode)}${tr.router?.reason?" ("+esc(tr.router.reason)+")":""}</span>`+(pMode!=null?`<span class="badge${stubClass}">redacción: ${esc(pMode)}${tr.phrase.reason?" ("+esc(tr.phrase.reason)+")":""}</span>`:"");
+ const stubTag=MODEL_MODE==="stub"?`<div class="cite" style="color:var(--stub);font-weight:600">STUB · no es salida real de Apertus</div>`:"";
+ $("#out").innerHTML=`<div class="card ${a.refused?"ref":""}">${stubTag}<div class="ans">${esc(a.answer)}</div>${a.citation_text?`<div class="cite">${esc(a.citation_text)}</div>`:""}${figs}<details><summary>${modes}</summary><pre>${esc(JSON.stringify({plan:a.plan,trace:a.trace},null,1))}</pre></details></div>`;}
+$("#f").onsubmit=e=>{e.preventDefault();ask()};
+</script>
+</body>
+</html>
