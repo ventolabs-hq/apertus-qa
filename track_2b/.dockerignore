@@ -4,3 +4,12 @@ docs/
 *.pdf
 .env
 .env.*
+*.env
+*_env.txt
+env.txt
+secrets/
+*.key
+*.log
+*.har
+raw/
+apertus-qa.tar

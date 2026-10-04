@@ -49,6 +49,8 @@ def validate_plan(d, cat: Catalog, question: str) -> str | None:
             return "op_kind_mismatch"
         if op == "comparar" and len(ids) != 2:
             return "comparar_needs_two"
+        if op in ("variacion", "variacion_mensual", "interanual") and any(sid in cat.series and cat.series[sid].kind == "pct" for sid in ids):
+            return "pct_series_needs_valor"   # the series already is a % change; ops would refuse (sin_datos)
     freq = None
     if ids and ids[0] in cat.series:
         freq = cat.series[ids[0]].freq

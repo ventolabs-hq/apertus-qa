@@ -14,7 +14,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from unittest import mock
 
-from apertus_qa import fmt, ops, rules
+from apertus_qa import fmt, ops, prompts, rules
 from apertus_qa.catalog import Catalog, DataError, DEFAULT_DIR
 from apertus_qa.gateway import Gateway, ProviderError, parse_json
 from apertus_qa.pipeline import QA
@@ -122,6 +122,12 @@ class TestOps(unittest.TestCase):
         b = self.run_(op="tabla_valor", series=["anac_2025_vuelos_cabotaje_por_ruta"], key="AER-CBA")
         self.assertEqual(a.figures[0]["value"], b.figures[0]["value"])
 
+    def test_table_key_unique_prefix(self):
+        r = self.run_(op="tabla_valor", series=["snic_sat_mv_victimas_por_vehiculo_2024"], key="moto")
+        self.assertEqual(r.figures[0]["value"], 1616.0)
+        with self.assertRaises(ops.NoData):
+            self.run_(op="tabla_valor", series=["snic_sat_mv_victimas_por_vehiculo_2024"], key="zz")
+
     def test_compare_requires_same_unit(self):
         with self.assertRaises(ops.NoData):
             self.run_(op="comparar", series=[IPC, "9.1_POB_2004_A_9"], period="2025")
@@ -148,6 +154,19 @@ class TestValidators(unittest.TestCase):
         self.assertEqual(validate_plan(self.plan(evil=1), CAT, "x"), "unknown_keys")
         self.assertEqual(validate_plan({"action": "refuse", "reason": "porque"}, CAT, "x"), "bad_reason")
         self.assertEqual(validate_plan("hola", CAT, "x"), "not_object")
+        self.assertEqual(validate_plan(self.plan(op="variacion", series=[IPC + "@dic_dic"], period=None, **{"from": "2024", "to": "2025"}),
+                                       CAT, "x"), "pct_series_needs_valor")
+
+    def test_dedupe_repeated_unit_word(self):
+        from apertus_qa.pipeline import dedupe_words
+        self.assertEqual(dedupe_words("tenía 46.387.098 habitantes habitantes."), "tenía 46.387.098 habitantes.")
+        self.assertEqual(dedupe_words("1.616 Víctimas víctimas fatales; 10 10"), "1.616 Víctimas fatales; 10 10")
+        self.assertEqual(dedupe_words("aumentó 2,7 %% y 3 % %."), "aumentó 2,7 % y 3 %.")
+
+    def test_router_prompt_carries_snapshot_date(self):
+        self.assertIn("2026-10-02", prompts.router_system(CAT.compact(), "2026-10-02"))
+        self.assertIn("Fecha de hoy: 2026-10-02", prompts.router_user("q", "2026-10-02"))
+        self.assertNotIn("{hoy}", prompts.router_system(CAT.compact()))
 
     def test_amount_must_be_in_question(self):
         p = self.plan(op="ajuste", amount=1000, period=None, **{"from": "2020-01"})
@@ -286,6 +305,7 @@ class FakeOpenAI(BaseHTTPRequestHandler):
     """Local stand-in for an OpenAI-compatible endpoint (vLLM/CSCS). Records requests; answers by task."""
     seen: list = []
     status = 200
+    fail_n = 0          # answer 503 this many times before succeeding (retry test)
 
     def log_message(self, *a): pass
 
@@ -294,12 +314,16 @@ class FakeOpenAI(BaseHTTPRequestHandler):
         FakeOpenAI.seen.append({"path": self.path, "auth": self.headers.get("Authorization"), "body": body})
         if FakeOpenAI.status != 200:
             self.send_response(FakeOpenAI.status); self.end_headers(); return
+        if FakeOpenAI.fail_n > 0:
+            FakeOpenAI.fail_n -= 1
+            self.send_response(503); self.end_headers(); return
         sysmsg = body["messages"][0]["content"]
         if "planificador" in sysmsg:
             content = json.dumps({"action": "answer", "op": "valor", "series": ["9.1_POB_2004_A_9"], "period": "2025"})
         else:
             content = json.dumps({"texto": "En {periodo}, Argentina tenía {valor}."})
-        out = json.dumps({"choices": [{"message": {"role": "assistant", "content": content}}]}).encode()
+        out = json.dumps({"choices": [{"message": {"role": "assistant", "content": content}}],
+                          "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}}).encode()
         self.send_response(200); self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(out))); self.end_headers(); self.wfile.write(out)
 
@@ -317,7 +341,7 @@ class TestRealProviderAgainstLocalFake(unittest.TestCase):
         cls.httpd.server_close()
 
     def setUp(self):
-        FakeOpenAI.seen.clear(); FakeOpenAI.status = 200
+        FakeOpenAI.seen.clear(); FakeOpenAI.status = 200; FakeOpenAI.fail_n = 0
 
     def test_end_to_end_real_mode(self):
         env = {"LLM_BASE_URL": self.base, "LLM_API_KEY": "test-key", "LLM_NAME": "swiss-ai/Apertus-v1.5-8B", "LLM_MODE": ""}
@@ -340,6 +364,23 @@ class TestRealProviderAgainstLocalFake(unittest.TestCase):
         gw = Gateway(provider=p)
         r = gw.generate_json(task="t", system="s", user="u", key="k", fallback=lambda: "FB")
         self.assertEqual((r.data, r.reason), ("FB", "rate_limited"))
+
+    def test_retry_with_backoff_on_5xx_then_success(self):
+        FakeOpenAI.fail_n = 2
+        slept = []
+        p = OpenAICompatProvider(self.base, "k", "m", retries=3, backoff_s=2.0, sleep=slept.append)
+        p.generate(system="Sos el planificador", user="u", task="router", key="k")
+        self.assertEqual(slept, [2.0, 4.0])
+        self.assertEqual((p.usage["calls"], p.usage["attempts"], p.usage["retries"]), (1, 3, 2))
+        self.assertEqual((p.usage["errors"], p.usage["total_tokens"]), ({"503": 2}, 15))
+
+    def test_no_retry_on_4xx_and_no_secret_in_errors(self):
+        FakeOpenAI.status = 401
+        p = OpenAICompatProvider(self.base, "sekret-123", "m", retries=3, sleep=lambda s: self.fail("slept"))
+        with self.assertRaises(ProviderError) as cm:
+            p.generate(system="s", user="u", task="t", key="k")
+        self.assertEqual((cm.exception.status, p.usage["attempts"]), (401, 1))
+        self.assertNotIn("sekret", str(cm.exception)); self.assertNotIn("127.0.0.1", str(cm.exception))
 
     def test_no_key_needed_for_self_hosted(self):
         p = OpenAICompatProvider(self.base, "", "apertus-local")

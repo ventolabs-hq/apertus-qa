@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import re
 import threading
+import time
 import unicodedata
 import urllib.error
 import urllib.request
@@ -53,12 +54,25 @@ class StubProvider:
 
 
 class OpenAICompatProvider:
+    """Retries (opt-in, `retries` > 0) only on HTTP 429 / 5xx, with exponential backoff (honours a numeric
+    Retry-After). Error messages never include the URL, headers or key. Token usage (if the server reports it) is
+    accumulated in `usage` so the eval can report it."""
+    RETRY_STATUS = {429, 500, 502, 503, 504}
+
     def __init__(self, base_url: str, api_key: str, model: str, timeout_s: float = 30.0, json_mode: bool = False,
-                 max_tokens: int = 400):
+                 max_tokens: int = 400, retries: int = 0, backoff_s: float = 2.0, sleep=time.sleep):
         self.base_url = (base_url or "").rstrip("/")
         self.api_key, self.model, self.timeout_s = api_key or "", model or "", timeout_s
         self.json_mode, self.max_tokens = json_mode, max_tokens
+        self.retries, self.backoff_s, self._sleep = max(0, int(retries)), backoff_s, sleep
         self.name = f"openai-compat:{self.model}"
+        self._lock = threading.Lock()
+        self.usage = {"calls": 0, "attempts": 0, "retries": 0, "prompt_tokens": 0, "completion_tokens": 0,
+                      "total_tokens": 0, "errors": {}}
+
+    def max_wall_s(self) -> float:
+        """Worst-case wall time of one generate() call incl. retries (the gateway timeout must cover it)."""
+        return self.timeout_s * (self.retries + 1) + sum(min(30.0, self.backoff_s * 2 ** i) for i in range(self.retries))
 
     def available(self) -> bool:
         return bool(self.base_url and self.model)
@@ -70,20 +84,53 @@ class OpenAICompatProvider:
             body["response_format"] = {"type": "json_object"}
         return body
 
+    def _count(self, field: str, n: int = 1, err: str | None = None):
+        with self._lock:
+            if err:
+                self.usage["errors"][err] = self.usage["errors"].get(err, 0) + 1
+            else:
+                self.usage[field] += n
+
+    def _once(self, url: str, data: bytes, headers: dict) -> dict:
+        req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+        self._count("attempts")
+        try:
+            with urllib.request.urlopen(req, timeout=self.timeout_s) as resp:
+                return json.loads(resp.read().decode())
+        except urllib.error.HTTPError as e:
+            ra = e.headers.get("Retry-After") if e.headers else None
+            err = ProviderError(f"HTTP {e.code}", code="http_error", status=e.code)
+            err.retry_after = float(ra) if ra and ra.strip().isdigit() else None
+            raise err from None
+        except (urllib.error.URLError, TimeoutError, OSError) as e:
+            raise ProviderError(f"network: {type(e).__name__}", code="network_error") from None
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            raise ProviderError("unexpected response shape", code="bad_response") from None
+
     def generate(self, *, system: str, user: str, task: str, key: str) -> str:
         url = self.base_url + "/chat/completions"
         data = json.dumps(self.request_body(system, user)).encode()
-        headers = {"Content-Type": "application/json"}
+        headers = {"Content-Type": "application/json", "User-Agent": "apertus-qa/0.1 (Vento Labs)"}
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
-        req = urllib.request.Request(url, data=data, headers=headers, method="POST")
-        try:
-            with urllib.request.urlopen(req, timeout=self.timeout_s) as resp:
-                doc = json.loads(resp.read().decode())
-        except urllib.error.HTTPError as e:
-            raise ProviderError(f"HTTP {e.code}", code="http_error", status=e.code) from None
-        except (urllib.error.URLError, TimeoutError, OSError) as e:
-            raise ProviderError(f"network: {type(e).__name__}", code="network_error") from None
+        self._count("calls")
+        for attempt in range(self.retries + 1):
+            try:
+                doc = self._once(url, data, headers)
+                break
+            except ProviderError as e:
+                retryable = e.status in self.RETRY_STATUS   # not DNS/connection errors: air-gapped runs fall back at once
+                self._count("", err=f"{e.status or e.code}")
+                if not retryable or attempt >= self.retries:
+                    raise
+                self._count("retries")
+                wait = getattr(e, "retry_after", None) or self.backoff_s * 2 ** attempt
+                self._sleep(min(30.0, wait))
+        u = doc.get("usage") if isinstance(doc, dict) else None
+        if isinstance(u, dict):
+            for f in ("prompt_tokens", "completion_tokens", "total_tokens"):
+                if isinstance(u.get(f), int):
+                    self._count(f, u[f])
         try:
             return doc["choices"][0]["message"]["content"]
         except (KeyError, IndexError, TypeError):
@@ -98,6 +145,13 @@ class RecordingProvider:
 
     def available(self) -> bool:
         return self.inner.available()
+
+    def max_wall_s(self) -> float:
+        return self.inner.max_wall_s() if hasattr(self.inner, "max_wall_s") else 30.0
+
+    @property
+    def usage(self):
+        return getattr(self.inner, "usage", None)
 
     def generate(self, *, system: str, user: str, task: str, key: str) -> str:
         out = self.inner.generate(system=system, user=user, task=task, key=key)

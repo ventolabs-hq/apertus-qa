@@ -18,7 +18,18 @@
   "phrase_model": 0,
   "phrase_fallback": 7,
   "seconds": 0.01,
-  "snapshot": "2026-10-02T14:20:15+00:00"
+  "snapshot": "2026-10-02T14:20:15+00:00",
+  "run_at": "2026-10-04T09:43:06-0300",
+  "code_sha256": "6fd7103d422b7545044e4bcc7c7a5c19062fb059d6b5bf701b2267f3d8ad37ab",
+  "latency_ms_p50": 0,
+  "latency_ms_p95": 2,
+  "latency_ms_max": 2,
+  "fallback_reasons": {
+   "phrase:breaker_open": 6,
+   "phrase:stub_miss": 1,
+   "router:breaker_open": 11,
+   "router:stub_miss": 2
+  }
  },
  "rows": [
   {
@@ -35,7 +46,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 2
   },
   {
    "id": "p_vida_2024",
@@ -51,7 +63,8 @@
    "values_ok": false,
    "citation_ok": false,
    "grounded": true,
-   "ok": false
+   "ok": false,
+   "latency_ms": 0
   },
   {
    "id": "p_crudo_oct25",
@@ -67,7 +80,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "p_gente_2015",
@@ -83,7 +97,8 @@
    "values_ok": false,
    "citation_ok": false,
    "grounded": true,
-   "ok": false
+   "ok": false,
+   "latency_ms": 0
   },
   {
    "id": "p_rutas_2020",
@@ -99,7 +114,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "p_bebes_2010",
@@ -115,7 +131,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "p_chile_ene26",
@@ -131,7 +148,8 @@
    "values_ok": false,
    "citation_ok": false,
    "grounded": true,
-   "ok": false
+   "ok": false,
+   "latency_ms": 0
   },
   {
    "id": "p_ventas_ext_2023",
@@ -147,7 +165,8 @@
    "values_ok": false,
    "citation_ok": false,
    "grounded": true,
-   "ok": false
+   "ok": false,
+   "latency_ms": 0
   },
   {
    "id": "p_solar_20_24",
@@ -163,7 +182,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "p_aeropuerto_2025",
@@ -179,7 +199,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "p_sueldo_ajuste",
@@ -195,7 +216,8 @@
    "values_ok": false,
    "citation_ok": false,
    "grounded": true,
-   "ok": false
+   "ok": false,
+   "latency_ms": 0
   },
   {
    "id": "p_ahorrar",
@@ -211,7 +233,8 @@
    "values_ok": null,
    "citation_ok": null,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "p_dolar_2027",
@@ -227,7 +250,8 @@
    "values_ok": null,
    "citation_ok": null,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   }
  ]
 }

@@ -59,13 +59,13 @@ echo "## 4. Test suite and both eval sets, no network"
 echo "\$ make test   (docker run --rm --network none ... unittest)"
 OUT=$(docker run --rm --network none $IMG python -m unittest discover -s tests -t . 2>&1)
 echo "$OUT" | tail -3
-echo "$OUT" | grep -q 'Ran 35 tests'
+N=$(echo "$OUT" | sed -n 's/^Ran \([0-9]*\) tests.*/\1/p'); test "${N:-0}" -ge 35   # at least the original 35
 echo "$OUT" | grep -q '^OK$'
 for s in main heldout; do for m in stub off; do
   echo "\$ docker run --rm --network none -e LLM_MODE=$m $IMG python -m eval.run_eval --mode $m --set $s --out /tmp/x"
   docker run --rm --network none -e LLM_MODE=$m $IMG python -m eval.run_eval --mode $m --set $s --out /tmp/x | python3 -c "
 import sys,json
-t=sys.stdin.read(); j=json.loads(t[t.rindex('{\n'):])
+t=sys.stdin.read(); j=json.loads(t[t.index('{'):])   # the summary is the only JSON printed
 print('  ',{k:j[k] for k in ('set','overall_ok','refusal_correct','false_refusals','grounding_violations','official_checks_ok','label','mode') if k in j})
 assert j.get('grounding_violations', 1) == 0
 if j.get('mode') == 'stub':

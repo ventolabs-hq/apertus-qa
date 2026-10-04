@@ -4,6 +4,7 @@ Each op returns a Result: figures (raw value + formatted string + series id + pe
 to the phrasing step, and the citation records. Ops raise NoData when the snapshot can't answer."""
 from __future__ import annotations
 
+import unicodedata
 from dataclasses import dataclass, field
 
 from . import fmt
@@ -101,6 +102,10 @@ def run(cat: Catalog, plan: dict) -> Result:
         else:
             key = str(plan.get("key") or "").upper()
             row = next(((k, v) for k, v in t.rows if k.upper() == key or "-".join(sorted(k.split("-"))) == "-".join(sorted(key.split("-")))), None)
+            if row is None and len(key) >= 3:   # tolerant match: unique accent/case-insensitive prefix (MOTO -> Motocicleta)
+                fold = lambda x: "".join(c for c in unicodedata.normalize("NFD", x.casefold()) if not unicodedata.combining(c))
+                hits = [(k, v) for k, v in t.rows if fold(k).startswith(fold(key)) or fold(name(k)).startswith(fold(key))]
+                row = hits[0] if len(hits) == 1 else None
             if row is None:
                 raise NoData(f"clave no encontrada: {key}", t.meta)
             r.slots["clave"] = name(row[0])

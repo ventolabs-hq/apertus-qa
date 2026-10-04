@@ -6,8 +6,9 @@
 - **Demo:** `[[VIDEO_URL]]` (≤ 2 min, screen capture + captions)
 - **Code:** `[[REPO_URL]]` @ `[[COMMIT]]`
 
-> **Draft status.** Numbers marked *STUB* come from replayed outputs **written by the build agent, not by Apertus**, or
-> from the no-model baseline. `[[REAL_RESULTS: …]]` marks space reserved for real Apertus runs (≈0.3–0.5 page).
+> **Status.** Numbers marked *STUB* come from replayed outputs **written by the build agent, not by Apertus**, or from the
+> no-model baseline. Numbers marked **Apertus** come from real calls to `swiss-ai/Apertus-v1.5-70B` on the CSCS inference
+> endpoint (4 Oct 2026; raw outputs in `docs/eval/eval_*_real.*`, summary in `docs/eval/REAL_RUN_2026-10-04.md`).
 
 ## 1. Summary
 
@@ -19,7 +20,8 @@ produces or sees a number. Deterministic code computes every figure and attaches
 data cannot answer, and refuses forecasts and financial advice. Everything except the model call runs with
 `docker run --network none`, and the model can be a self-hosted Apertus on the same isolated network.
 *STUB/baseline:* main set 31/31, held-out paraphrases 8/13, 0 grounding violations, 5/5 INDEC cross-checks.
-[[REAL_RESULTS: one-sentence headline — Apertus 8B main x/31, held-out y/13, grounding violations z]]
+**Apertus v1.5-70B (real, CSCS):** main 30/31, held-out paraphrases **12/13** (baseline 8/13), 0 grounding violations,
+0 false refusals, 5/5 INDEC cross-checks; median 2.5 s per question.
 
 ## 2. Architecture
 
@@ -72,7 +74,7 @@ shows series and period next to every answer so users can spot it.
 
 **Air-gap proof** (`make offline-proof`; full transcript in `docs/OFFLINE.md`). Under `--network none` only `lo` exists;
 connections to `1.1.1.1:443` / `8.8.8.8:53` fail (`Network is unreachable`) and DNS fails; the server answers `/health`
-and `/api/ask` inside the container; 35 tests and all four eval runs pass with unchanged scores; in `real` mode the trace
+and `/api/ask` inside the container; 40 tests and all four STUB/off eval runs pass with unchanged scores; in `real` mode the trace
 shows `fallback (network_error)` and the answer is still correct and cited — the model call is the only network dependency.
 `docs/deploy/docker-compose.airgap.yml` sketches app + vLLM with local Apertus weights on an `internal: true` network
 (not run: no GPU).
@@ -81,14 +83,24 @@ shows `fallback (network_error)` and the answer is still correct and cited — t
 
 | Aspect | Setup |
 |---|---|
-| Model | `swiss-ai/Apertus-v1.5-8B` `[[REAL_RESULTS: confirm exact LLM_NAME; 70B if run]]` |
+| Model | `swiss-ai/Apertus-v1.5-70B`: the largest non-"thinking" Apertus model listed by the CSCS endpoint's `/models` (which also lists v1.5-8B, the 2509 Instruct 8B/70B and v1.5 thinking variants) |
 | Usage | Inference in two roles: P1 tool-use-style **planning** (one JSON plan over a 47-entry catalog) and P2 **constrained generation** (Spanish phrasing with placeholders only) |
 | Serving | CSCS endpoint or any OpenAI-style server via `LLM_BASE_URL`, `LLM_NAME`, `LLM_API_KEY`; `/chat/completions`, temperature 0; optional `response_format: json_object` |
 | P1 prompt | Spanish instructions + compact catalog (ids, titles, units, frequency, coverage; **no values**; ≈4k tokens) → `{action, op, series, period, from, to, amount, n, …}` or `{action: "refuse", reason}` (out of scope / forecast / advice / other). Out-of-coverage periods pass through so code can explain coverage. |
 | P2 prompt | Question, operation, placeholder descriptions, direction hints → `{"texto": …}`, one or two sentences |
 | Record/replay | `LLM_MODE=record` saves real outputs, so judges can replay a real run with no key or network (labelled as replay) |
 
-[[REAL_RESULTS: observed behaviour — JSON validity rate, typical plan errors, phrasing rejections by reason, latency p50/p95, prompt iterations]]
+**Observed behaviour (real runs, 44 questions, 78 calls).** Every output parsed as JSON (0 `bad_json`); 0 HTTP errors,
+0 timeouts, 0 retries. *Router:* plan used for 24/31 main and 13/13 held-out questions; the 7 main rejections went to the
+rules router (period format 2, unknown/ill-formed series 2, table/operation mismatch 1, change operation on a series that
+is already a % change 2). *Phrasing:* text used for 11/23 main and 5/11 held-out answers; rejections (→ template) were
+digits (main 10, held-out 4; on the main set mostly years copied from the question), number words (1 / 2) and a missing placeholder (1 / 0).
+*Latency* per question (router + phrasing + computation): main p50 2.5 s, p95 3.4 s, max 3.5 s; held-out p50 2.6 s,
+p95 3.0 s, max 3.0 s. *Tokens:* 171,117 (main, 54 calls) and 72,100 (held-out, 24 calls). *Prompt iterations,* on the main
+set only: 19 → 21 → 29 → 29 → 30/31. The first real run refused 7 questions about 2025–26 as "forecasts"; giving the router
+the snapshot date plus six few-shot plans fixed that; a validator now sends "% change of a % series" plans to the rules
+router. A phrasing-prompt pass (no copied dates, `%` already in `{variacion}`) lowered phrasing use on the main set (11 → 8
+of 23, score unchanged) and was reverted.
 
 No other model is used at runtime or in evaluation (scoring is deterministic code, no LLM judge).
 
@@ -123,22 +135,32 @@ target 0), false refusals, fallback rates by reason.
 | No-model baseline (rules + templates) | main | 31/31 | 23/23 | 8/8 | 0 | 0 |
 | STUB replay (agent-written, **not Apertus**) | main | 31/31 | 23/23 | 8/8 | 0 | 0 |
 | No-model baseline | held-out | 8/13 | 6/11 | 2/2 | 4 | 0 |
-| **Apertus 8B** | main | `[[REAL_RESULTS]]` | | | | |
-| **Apertus 8B** | held-out | `[[REAL_RESULTS]]` | | | | |
+| **Apertus v1.5-70B** (real) | main | 30/31 | 23/23 | 7/8 | 0 | 0 |
+| **Apertus v1.5-70B** (real) | held-out | **12/13** | 10/11 | 2/2 | 0 | 0 |
 
-All rows reproduced in the Docker image with `--network none`; INDEC cross-checks 5/5.
+Baseline and STUB rows reproduced in the Docker image with `--network none`; Apertus rows run from the same code on the
+host (`LLM_MODE=real make eval-local`, smoke-tested in the image); INDEC cross-checks 5/5 in the final main runs.
 **Reading.** The rules router was written while looking at the main set, so its 31/31 is not blind; the held-out set is the
 fair comparison. Claim under test: *Apertus raises held-out coverage above the baseline's 8/13 while keeping grounding
 violations at 0.* STUB rows only show that pipeline, validators and fallbacks work; its four adversarial outputs (unknown
 series id, markdown-fenced plan, invented figure, banned word "récord") are all handled as designed.
 
-[[REAL_RESULTS: error analysis ≈ 0.3 page — per-category breakdown; plan errors caught vs passed; phrasing rejections; optional 70B row]]
+**Error analysis (Apertus).** The 4 held-out gains over the baseline are paraphrases the rules router misses: synonyms
+("gente" for population, "ventas al exterior" for exports, "en avión" for air trips) and a salary amount to adjust by CPI
+that the rules sent to the wage index. All final-run held-out plans passed validation. Two misses, neither with an invented number:
+(1) main "¿Cuántos nacimientos hubo en 2024?" was refused as out of scope instead of planned on the births series (which
+ends in 2022), so the user is not told the coverage limit; (2) held-out "¿Qué tan cara se puso la vida en 2024, punta a
+punta?" was planned as the Nov→Dec 2024 change (2.7 %) instead of the Dec–Dec annual change: a valid but wrong plan, shown
+with its series and period, i.e. the residual failure mode in §2. Plan errors caught by validators: 7/31 main, 0/13
+held-out; wrong plans that passed: 1 (held-out). The endpoint is not fully deterministic at temperature 0: in one earlier
+run with the same prompts, miss (2) was a refusal instead; the score was 12/13 in all held-out runs.
 
 ## 6. Limitations
 
 Fixed coverage (47 entries; no unemployment, poverty or GDP yet; CPI to Aug 2026). A valid but wrong plan can answer a
 slightly different question (1/13 held-out for the baseline); plan–question consistency checks are planned. Spanish only,
-single turn. Real-model results pending; self-hosted Apertus untested (no GPU); no load or accessibility testing.
+single turn. Real-model results come from one model (v1.5-70B) and 44 questions, with prompts iterated on the main set; no
+8B comparison yet; self-hosted Apertus untested (no GPU); no load or accessibility testing.
 
 ## 7. Reproducibility
 
@@ -150,7 +172,7 @@ identically (apart from a timing field). Verified on Docker Engine 29.8.2, Linux
 
 ## 8. Next steps
 
-Real Apertus runs (8B, then 70B) with prompt iteration on the held-out set; plan–question consistency checks; more series
+An 8B comparison and a recorded real run for key-less replay; a larger fresh held-out set; plan–question consistency checks; more series
 (labour market, GDP, provinces); a second statistics office (e.g. BFS / opendata.swiss) through the same catalog format; a
 measured self-hosted deployment on an isolated GPU node.
 

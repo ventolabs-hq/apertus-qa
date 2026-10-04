@@ -55,6 +55,37 @@ def score_one(item, out):
 
 
 
+def code_fingerprint() -> str:
+    """sha256 over the pipeline code, prompts, stub files and eval questions: ties an eval output to the code it ran."""
+    import hashlib
+    root = HERE.parent
+    files = sorted((root / "apertus_qa").glob("*.py")) + sorted((root / "apertus_qa" / "stub").glob("*.json")) + \
+        [HERE / "run_eval.py", HERE / "questions.jsonl", HERE / "questions_heldout.jsonl"]
+    h = hashlib.sha256()
+    for f in files:
+        if f.exists():
+            h.update(str(f.relative_to(root)).encode() + b"\0" + f.read_bytes() + b"\0")
+    return h.hexdigest()
+
+
+def latency_stats(ms: list[int]) -> dict:
+    if not ms:
+        return {}
+    s = sorted(ms)
+    pct = lambda q: s[min(len(s) - 1, max(0, int(round(q * len(s) + 0.5)) - 1))]   # nearest-rank percentile
+    return {"latency_ms_p50": pct(0.50), "latency_ms_p95": pct(0.95), "latency_ms_max": s[-1]}
+
+
+def fallback_reasons(rows) -> dict:
+    out: dict[str, int] = {}
+    for r in rows:
+        for k in ("router_reason", "phrase_reason"):
+            if r.get(k):
+                key = f"{k.split('_')[0]}:{r[k]}"
+                out[key] = out.get(key, 0) + 1
+    return dict(sorted(out.items()))
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--mode", default=os.environ.get("LLM_MODE") or "stub")
@@ -64,7 +95,19 @@ def main(argv=None):
     qa = QA.from_env(a.mode)
     items = [json.loads(l) for l in (HERE / ("questions.jsonl" if a.set == "main" else "questions_heldout.jsonl")).read_text().splitlines() if l.strip()]
     t0 = time.time()
-    rows = [score_one(it, qa.answer(it["q"])) for it in items]
+    prov = qa.gateway.provider if qa.gateway else None
+    rows = []
+    for it in items:                       # strictly sequential: one question (<= 2 model calls) at a time
+        u0 = json.loads(json.dumps(getattr(prov, "usage", None) or {}))
+        tq = time.time()
+        out = qa.answer(it["q"])
+        r = score_one(it, out)
+        r["latency_ms"] = int((time.time() - tq) * 1000)
+        u1 = getattr(prov, "usage", None) or {}
+        if u1:
+            r["tokens"] = u1.get("total_tokens", 0) - u0.get("total_tokens", 0)
+            r["model_calls"] = u1.get("calls", 0) - u0.get("calls", 0)
+        rows.append(r)
     n = len(rows)
     ans = [r for r in rows if r["values_ok"] is not None]
     ref = [r for r in rows if r["values_ok"] is None]
@@ -83,17 +126,25 @@ def main(argv=None):
         "router_model": sum(r["router"] == "llm" for r in rows), "router_fallback": sum(r["router"] == "fallback" for r in rows),
         "phrase_model": sum(r["phrase"] == "llm" for r in rows), "phrase_fallback": sum(r["phrase"] == "fallback" for r in rows),
         "seconds": round(time.time() - t0, 2), "snapshot": qa.catalog.built_at,
+        "run_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "code_sha256": code_fingerprint(),
+        **latency_stats([r["latency_ms"] for r in rows]),
+        "fallback_reasons": fallback_reasons(rows),
     }
+    u = getattr(prov, "usage", None)
+    if u:   # real/record mode only: transport + token accounting reported by the server
+        summ.update({"model_calls": u["calls"], "http_attempts": u["attempts"], "retries": u["retries"],
+                     "transport_errors": dict(u["errors"]), "prompt_tokens": u["prompt_tokens"],
+                     "completion_tokens": u["completion_tokens"], "total_tokens": u["total_tokens"]})
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     (out / f"eval_{a.set}_{qa.mode}.json").write_text(json.dumps({"summary": summ, "rows": rows}, ensure_ascii=False, indent=1))
     summ["set"] = a.set
     lines = [f"# Eval ({a.set}) — {label}", "", "| métrica | valor |", "|---|---|"] + [f"| {k} | {v} |" for k, v in summ.items()]
-    lines += ["", "| id | ok | decisión | valores | cita | router | redacción | respuesta |", "|---|---|---|---|---|---|---|---|"]
+    lines += ["", "| id | ok | decisión | valores | cita | router | redacción | ms | respuesta |", "|---|---|---|---|---|---|---|---|---|"]
     for r in rows:
         lines.append(f"| {r['id']} | {'✔' if r['ok'] else '✘'} | {r['decision_ok']} | {r['values_ok']} | {r['citation_ok']} | "
                      f"{r['router']}{' (' + str(r['router_reason']) + ')' if r['router_reason'] else ''} | "
-                     f"{r['phrase']}{' (' + str(r['phrase_reason']) + ')' if r['phrase_reason'] else ''} | {r['answer'][:140].replace('|', '/')} |")
+                     f"{r['phrase']}{' (' + str(r['phrase_reason']) + ')' if r['phrase_reason'] else ''} | {r['latency_ms']} | {r['answer'][:140].replace('|', '/')} |")
     (out / f"eval_{a.set}_{qa.mode}.md").write_text("\n".join(lines) + "\n")
     print(json.dumps(summ, ensure_ascii=False, indent=1))
     return 0 if summ["grounding_violations"] == 0 else 1

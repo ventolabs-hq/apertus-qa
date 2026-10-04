@@ -18,7 +18,16 @@
   "phrase_model": 0,
   "phrase_fallback": 23,
   "seconds": 0.01,
-  "snapshot": "2026-10-02T14:20:15+00:00"
+  "snapshot": "2026-10-02T14:20:15+00:00",
+  "run_at": "2026-10-04T09:43:06-0300",
+  "code_sha256": "6fd7103d422b7545044e4bcc7c7a5c19062fb059d6b5bf701b2267f3d8ad37ab",
+  "latency_ms_p50": 0,
+  "latency_ms_p95": 0,
+  "latency_ms_max": 2,
+  "fallback_reasons": {
+   "phrase:no_provider": 23,
+   "router:no_provider": 31
+  }
  },
  "rows": [
   {
@@ -36,7 +45,8 @@
    "citation_ok": true,
    "grounded": true,
    "official_ok": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 2
   },
   {
    "id": "ipc_interanual_ago26",
@@ -53,7 +63,8 @@
    "citation_ok": true,
    "grounded": true,
    "official_ok": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "ipc_anual_2025",
@@ -70,7 +81,8 @@
    "citation_ok": true,
    "grounded": true,
    "official_ok": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "ipc_max_mensual",
@@ -87,7 +99,8 @@
    "citation_ok": true,
    "grounded": true,
    "official_ok": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "ipc_variacion_23_24",
@@ -104,7 +117,8 @@
    "citation_ok": true,
    "grounded": true,
    "official_ok": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "ipc_ajuste_1000",
@@ -120,7 +134,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "salarios_vs_ipc_2025",
@@ -136,7 +151,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "poblacion_2025",
@@ -152,7 +168,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "expo_total_2024",
@@ -168,7 +185,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "expo_rubro_2024",
@@ -184,7 +202,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "tipo_cambio_2025",
@@ -200,7 +219,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "turismo_brasil_ago26",
@@ -216,7 +236,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "turismo_ranking_2025",
@@ -232,7 +253,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "solar_2025",
@@ -248,7 +270,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "eolica_15_25",
@@ -264,7 +287,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "petroleo_nov25",
@@ -280,7 +304,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "petroleo_interanual_nov25",
@@ -296,7 +321,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "subte_jun26",
@@ -312,7 +338,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "subte_total_2025",
@@ -328,7 +355,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "nacimientos_2022",
@@ -344,7 +372,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "vuelos_ruta_2025",
@@ -360,7 +389,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "viales_2024",
@@ -376,7 +406,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "viales_moto_2024",
@@ -392,7 +423,8 @@
    "values_ok": true,
    "citation_ok": true,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "rechazo_nacimientos_2024",
@@ -408,7 +440,8 @@
    "values_ok": null,
    "citation_ok": null,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "rechazo_ipc_futuro",
@@ -424,7 +457,8 @@
    "values_ok": null,
    "citation_ok": null,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "rechazo_pronostico",
@@ -440,7 +474,8 @@
    "values_ok": null,
    "citation_ok": null,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "rechazo_blue",
@@ -456,7 +491,8 @@
    "values_ok": null,
    "citation_ok": null,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "rechazo_consejo",
@@ -472,7 +508,8 @@
    "values_ok": null,
    "citation_ok": null,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "rechazo_desempleo",
@@ -488,7 +525,8 @@
    "values_ok": null,
    "citation_ok": null,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "rechazo_pasajeros_aereos",
@@ -504,7 +542,8 @@
    "values_ok": null,
    "citation_ok": null,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   },
   {
    "id": "rechazo_inyeccion",
@@ -520,7 +559,8 @@
    "values_ok": null,
    "citation_ok": null,
    "grounded": true,
-   "ok": true
+   "ok": true,
+   "latency_ms": 0
   }
  ]
 }

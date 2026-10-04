@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import os
+import re
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -51,6 +52,15 @@ REFUSALS = {
 }
 
 
+_DUP = re.compile(r"\b([^\W\d_]{3,})(?:\s+\1\b)+", re.I)
+
+
+def dedupe_words(text: str) -> str:
+    """Collapse an immediately repeated word or percent sign ("1.616 víctimas víctimas", "2,7 %%") when the model repeats
+    the unit that the placeholder already carries. Letters and "%" only, so figures are never touched."""
+    return re.sub(r"%(?:\s*%)+", "%", _DUP.sub(r"\1", text))   # "{variacion}%" when the slot already has "%"
+
+
 def _template(op: str, slots: dict) -> str:
     if op == "ranking":
         n = sum(1 for k in slots if k.startswith("serie_"))
@@ -75,7 +85,8 @@ def make_provider(mode: str | None = None):
     mode = (mode or os.environ.get("LLM_MODE") or "").lower()
     real = OpenAICompatProvider(os.environ.get("LLM_BASE_URL", ""), os.environ.get("LLM_API_KEY", ""),
                                 os.environ.get("LLM_NAME", ""), float(os.environ.get("LLM_TIMEOUT_S") or 30),
-                                (os.environ.get("LLM_JSON_MODE") or "0") == "1")
+                                (os.environ.get("LLM_JSON_MODE") or "0") == "1",
+                                retries=int(os.environ.get("LLM_RETRIES") or 3))
     if not mode:
         mode = "real" if real.available() else "stub"
     if mode == "off":
@@ -99,7 +110,9 @@ class QA:
         cat = Catalog()
         rpm = int(os.environ.get("LLM_RPM") or (100000 if m in ("stub", "off") else 60))
         daily = int(os.environ.get("LLM_DAILY_BUDGET") or (10**9 if m in ("stub", "off") else 5000))
-        return cls(cat, Gateway(provider=provider, timeout_s=float(os.environ.get("LLM_TIMEOUT_S") or 30),
+        # the gateway deadline covers the provider's own retries + backoff (real mode); stub/off are instant
+        gw_timeout = provider.max_wall_s() if hasattr(provider, "max_wall_s") else float(os.environ.get("LLM_TIMEOUT_S") or 30)
+        return cls(cat, Gateway(provider=provider, timeout_s=gw_timeout,
                                 rpm_budget=rpm, daily_budget=daily), m)
 
     def answer(self, question: str) -> dict:
@@ -110,7 +123,7 @@ class QA:
         if len(q) < 3:
             return self._refusal(q, "no_entendida", trace, t0)
         rp = self.gateway.generate_json(
-            task="router", key=q, system=prompts.router_system(cat.compact()), user=prompts.router_user(q),
+            task="router", key=q, system=prompts.router_system(cat.compact(), cat.built_at[:10]), user=prompts.router_user(q, cat.built_at[:10]),
             fallback=lambda: rules.plan(q, cat), validate=lambda d: validate_plan(d, cat, q))
         plan = rp.data
         trace["router"] = {"mode": rp.mode, "reason": rp.reason, "plan": plan}
@@ -132,7 +145,7 @@ class QA:
             fallback=lambda: {"texto": tpl},
             validate=lambda d: validate_phrase(d, res.slots, required, forbidden))
         trace["phrase"] = {"mode": pp.mode, "reason": pp.reason}
-        text = render(pp.data["texto"], res.slots)
+        text = dedupe_words(render(pp.data["texto"], res.slots))
         if not grounded(text, res.slots):            # belt and braces; cannot happen if validators hold
             text = render(tpl, res.slots)
             trace["phrase"]["grounding_override"] = True

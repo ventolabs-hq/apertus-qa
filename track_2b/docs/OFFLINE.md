@@ -32,17 +32,17 @@ hay que aceptar sus condiciones), GPU con memoria suficiente para el 8B, o una v
 Los datos se actualizan **fuera** del sitio aislado: `make snapshot` (mantenedores) regenera `data/snapshot/` desde descargas
 crudas verificadas; se reconstruye la imagen y se transfiere. El sitio nunca descarga nada.
 
-## Prueba verificada: todo funciona con `--network none` (3 oct 2026; re-verificado tras polish STUB DEMO)
+## Prueba verificada: todo funciona con `--network none` (3 oct 2026; re-verificado 4 oct 2026 tras la integración del endpoint real)
 
 Entorno: Docker Engine 29.8.2 (Debian 13, x86-64), imagen `apertus-qa:local` construida con
 `docker build --no-cache --network none -t apertus-qa:local .` (7 pasos OK; la única descarga es la imagen base, que hace
-el daemon, no el contenedor). Reproducir con **`make offline-proof`** (script: `scripts/offline_proof.sh`; falla si algún paso no cumple: solo `lo`, egress/DNS bloqueados, banner STUB en la UI, 35 tests, evals con 0 grounding violations).
+el daemon, no el contenedor). Reproducir con **`make offline-proof`** (script: `scripts/offline_proof.sh`; falla si algún paso no cumple: solo `lo`, egress/DNS bloqueados, banner STUB en la UI, ≥ 35 tests (40 desde el 4 oct), evals con 0 grounding violations).
 
 Qué demuestra:
 1. Dentro del contenedor solo existe la interfaz `lo`.
 2. No hay salida a internet ni DNS (`Network is unreachable`, fallo de resolución).
 3. La app completa (UI/API, cálculo, citas, rechazos) responde dentro del mismo contenedor aislado.
-4. Los 35 tests y las dos evaluaciones (principal y held-out; modos STUB y `off`) pasan sin red. Las cifras son las mismas
+4. Los tests (40) y las dos evaluaciones (principal y held-out; modos STUB y `off`) pasan sin red. Las cifras son las mismas
    que en `docs/eval/` (31/31 principal; 8/13 held-out; 0 violaciones de grounding; 5/5 cotejos con INDEC).
 5. La **única** dependencia de red es la llamada al modelo: en modo `real` sin red, el gateway registra
    `network_error` y cae a reglas + plantillas, y la respuesta sigue siendo correcta y citada.
@@ -53,7 +53,7 @@ Salida literal de `make offline-proof`:
 $ docker version --format 'client {{.Client.Version}} / server {{.Server.Version}}'
 client 29.8.2 / server 29.8.2
 $ docker image inspect apertus-qa:local --format '{{.Id}}'
-sha256:206e98232ae16b33651b284fd616002690c58347a7d679341ca07c9459e91cd9
+sha256:8d9af44db65743bfc40b3a15a609fe009aed462a31e555585a0149bad117f679
 
 ## 1. Interfaces inside a --network none container (only loopback expected)
 $ docker run --rm --network none apertus-qa:local python -c "import socket;print(sorted(n for _,n in socket.if_nameindex()))"
@@ -82,22 +82,24 @@ none
 
 ## 4. Test suite and both eval sets, no network
 $ make test   (docker run --rm --network none ... unittest)
-Ran 35 tests in 1.165s
+Ran 40 tests in 1.163s
 
 OK
 $ docker run --rm --network none -e LLM_MODE=stub apertus-qa:local python -m eval.run_eval --mode stub --set main --out /tmp/x
-   {'set': 'main', 'overall_ok': 31, 'refusal_correct': 8, 'false_refusals': 0, 'grounding_violations': 0, 'official_checks_ok': '5/5'}
+   {'set': 'main', 'overall_ok': 31, 'refusal_correct': 8, 'false_refusals': 0, 'grounding_violations': 0, 'official_checks_ok': '5/5', 'label': 'STUB (canned replay, not real Apertus)', 'mode': 'stub'}
 $ docker run --rm --network none -e LLM_MODE=off apertus-qa:local python -m eval.run_eval --mode off --set main --out /tmp/x
-   {'set': 'main', 'overall_ok': 31, 'refusal_correct': 8, 'false_refusals': 0, 'grounding_violations': 0, 'official_checks_ok': '5/5'}
+   {'set': 'main', 'overall_ok': 31, 'refusal_correct': 8, 'false_refusals': 0, 'grounding_violations': 0, 'official_checks_ok': '5/5', 'label': 'NO-MODEL baseline (rules + templates)', 'mode': 'off'}
 $ docker run --rm --network none -e LLM_MODE=stub apertus-qa:local python -m eval.run_eval --mode stub --set heldout --out /tmp/x
-   {'set': 'heldout', 'overall_ok': 8, 'refusal_correct': 2, 'false_refusals': 4, 'grounding_violations': 0, 'official_checks_ok': '0/0'}
+   {'set': 'heldout', 'overall_ok': 8, 'refusal_correct': 2, 'false_refusals': 4, 'grounding_violations': 0, 'official_checks_ok': '0/0', 'label': 'STUB (canned replay, not real Apertus)', 'mode': 'stub'}
 $ docker run --rm --network none -e LLM_MODE=off apertus-qa:local python -m eval.run_eval --mode off --set heldout --out /tmp/x
-   {'set': 'heldout', 'overall_ok': 8, 'refusal_correct': 2, 'false_refusals': 4, 'grounding_violations': 0, 'official_checks_ok': '0/0'}
+   {'set': 'heldout', 'overall_ok': 8, 'refusal_correct': 2, 'false_refusals': 4, 'grounding_violations': 0, 'official_checks_ok': '0/0', 'label': 'NO-MODEL baseline (rules + templates)', 'mode': 'off'}
 
 ## 5. The ONLY network use is the model call: real mode with no network degrades safely
 $ docker run --rm --network none -e LLM_MODE=real -e LLM_BASE_URL=https://example.invalid/v1 -e LLM_NAME=placeholder -e LLM_API_KEY=dummy -e LLM_TIMEOUT_S=3 apertus-qa:local python -m apertus_qa ask --json '¿Cuál fue la inflación mensual de agosto de 2026?'
   answer: IPC Nivel General Nacional (base dic-2016 = 100): variación mensual de 1,7 % en agosto de 2026 (respecto de julio de 2026).
   trace: {"model_mode": "real", "router": {"mode": "fallback", "reason": "network_error", "plan": {"action": "answer", "op": "variacion_mensual", "series": ["148.3_INIVELNAL_DICI_M_26"], "period": "2026-08"}}, "phrase": {"mode": "fallback", "reason": "network_error"}}
+
+offline-proof: OK (air-gap + STUB UI marker + tests/evals + safe real-mode fallback)
 ```
 
 Nota sobre el modo `real` con red: el contenedor necesita salida **solo** hacia `LLM_BASE_URL` (CSCS o un Apertus
