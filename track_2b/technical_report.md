@@ -3,8 +3,8 @@
 - **Track:** Track 2B — Apertus QA (own project)
 - **Event:** Online
 - **Team / entrant:** Vento Labs
-- **Demo:** `[[VIDEO_URL]]` (≤ 2 min, screen capture + captions)
-- **Code:** `[[REPO_URL]]` @ `[[COMMIT]]`
+- **Demo:** `https://github.com/ventolabs-hq/apertus-qa/blob/38b937c3664e03e9a021dbd8881b463cefc3a04e/track_2b/demo/apertus-qa-demo.mp4` (≤ 2 min, screen capture + captions)
+- **Code:** `https://github.com/ventolabs-hq/apertus-qa` @ `38b937c3664e03e9a021dbd8881b463cefc3a04e`
 
 > **Status.** Numbers marked *STUB* come from replayed outputs **written by the build agent, not by Apertus**, or from the
 > no-model baseline. Numbers marked **Apertus** come from real calls to `swiss-ai/Apertus-v1.5-70B` (and, for comparison,
@@ -175,7 +175,7 @@ From `track_2b/`: `make run` (UI at `http://localhost:8080`), `make test`, `make
 `make offline-proof`, `make report` (this PDF). STUB and off modes are deterministic: `docs/eval/` regenerates
 identically (apart from a timing field). Verified on Docker Engine 29.8.2, Linux x86-64, CPU only. Without Docker: `make run-local` /
 `test-local` / `eval-local` (Python ≥ 3.10). Real runs: set `LLM_BASE_URL`, `LLM_NAME`, `LLM_API_KEY`, then
-`LLM_MODE=record make eval`; without a key, `LLM_MODE=replay make eval` replays the recorded 70B run offline. Commit: `[[COMMIT]]`.
+`LLM_MODE=record make eval`; without a key, `LLM_MODE=replay make eval` replays the recorded 70B run offline. Code commit: `38b937c3664e03e9a021dbd8881b463cefc3a04e` (the commit after it only fills in these links and rebuilds this PDF).
 
 ## 8. Next steps
 
