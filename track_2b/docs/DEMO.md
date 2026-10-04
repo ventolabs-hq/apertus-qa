@@ -3,7 +3,7 @@
 **Recording readiness: STUB cut ready; real-Apertus cut ready (appendix, since 2026-10-04).** Nothing has been recorded
 yet. The main section is the shot list for a **clearly labelled STUB** screen-capture (agent-written replay, not real
 Apertus): never present STUB numbers as model results. The appendix is the real cut, using only the verified numbers from
-`docs/eval/eval_*_real.*` — **do not invent live results**.
+`docs/eval/eval_*_record.*` (70B) — **do not invent live results**.
 
 **Format.** Screen capture of the local app and a terminal only. No face, no voice, no music with lyrics. English
 captions burned in (the UI is in Spanish, so captions translate the question and answer). 1920×1080, 30 fps, MP4 (H.264),
@@ -84,8 +84,8 @@ Notes:
 
 ## Appendix — real Apertus cut (ready to record; verified numbers from 2026-10-04)
 
-Source of every number below: `docs/eval/eval_main_real.json` / `eval_heldout_real.json` (model
-`swiss-ai/Apertus-v1.5-70B`, CSCS endpoint, run 2026-10-04 09:44 ART, `code_sha256` `6fd7103d…` in each summary) and
+Source of every number below: `docs/eval/eval_main_record.json` / `eval_heldout_record.json` (model
+`swiss-ai/Apertus-v1.5-70B`, CSCS endpoint, run 2026-10-04 09:51 ART, `code_sha256` `6612741a…` in each summary) and
 `docs/eval/REAL_RUN_2026-10-04.md`. If the code or model changes, re-run the eval and re-check these captions first.
 
 **Key safety while recording (mandatory).** Load the env in a terminal that is **not on camera**
@@ -107,7 +107,7 @@ in post.
 | 5 | 0:54–1:06 | **Replace** the births question (real Apertus refuses it as out of scope instead of stating the 2022 limit: the one main-set miss) with the held-out paraphrase "¿Cuánta gente vivía en el país en 2015?": the no-model rules router refuses it, Apertus answers with the population series |
 | 6 | 1:06–1:16 | Same two refusals (forecast, advice) |
 | 7 | 1:16–1:36 | Same `make offline-proof` (it proves the no-network fallback; it never calls the endpoint) |
-| 8 | 1:36–1:48 | Terminal: `docs/eval/eval_main_real.md` and `eval_heldout_real.md` summary tables (label `REAL model`) |
+| 8 | 1:36–1:48 | Terminal: summary of `docs/eval/eval_main_record.json` and `eval_heldout_record.json` (label `REAL model (recording)`) |
 | 9 | 1:48–1:56 | End card without "STUB DEMO" |
 
 Caption changes (all others as in the STUB script; drop "STUB DEMO" from 1 and 19):

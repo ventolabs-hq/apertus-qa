@@ -15,11 +15,12 @@ from pathlib import Path
 from . import fmt, ops, prompts, rules
 from .catalog import Catalog
 from .gateway import Gateway
-from .providers import OpenAICompatProvider, RecordingProvider, StubProvider
+from .providers import OpenAICompatProvider, RecordingProvider, ReplayProvider, StubProvider
 from .validate import grounded, render, validate_phrase, validate_plan
 
 HERE = Path(__file__).resolve().parent
-STUB_FILES = [HERE / "stub" / "canned.json", HERE / "stub" / "recorded.json"]
+STUB_FILES = [HERE / "stub" / "canned.json"]                 # agent-written STUB only; never real recordings
+REPLAY_FILE = Path(os.environ.get("LLM_REPLAY_FILE") or HERE / "replay" / "apertus_real.json")
 
 REQUIRED = {"valor": ["valor"], "ultimo": ["valor"], "variacion": ["variacion"], "variacion_mensual": ["variacion"],
             "interanual": ["variacion"], "maximo": ["valor", "periodo"], "minimo": ["valor", "periodo"],
@@ -93,8 +94,10 @@ def make_provider(mode: str | None = None):
         return None, "off"
     if mode == "stub":
         return StubProvider(*STUB_FILES), "stub"
+    if mode == "replay":
+        return ReplayProvider(REPLAY_FILE), "replay"
     if mode == "record":
-        return RecordingProvider(real, HERE / "stub" / "recorded.json"), "record"
+        return RecordingProvider(real, REPLAY_FILE), "record"
     return real, "real"
 
 
@@ -108,8 +111,9 @@ class QA:
     def from_env(cls, mode: str | None = None) -> "QA":
         provider, m = make_provider(mode)
         cat = Catalog()
-        rpm = int(os.environ.get("LLM_RPM") or (100000 if m in ("stub", "off") else 60))
-        daily = int(os.environ.get("LLM_DAILY_BUDGET") or (10**9 if m in ("stub", "off") else 5000))
+        local = m in ("stub", "off", "replay")
+        rpm = int(os.environ.get("LLM_RPM") or (100000 if local else 60))
+        daily = int(os.environ.get("LLM_DAILY_BUDGET") or (10**9 if local else 5000))
         # the gateway deadline covers the provider's own retries + backoff (real mode); stub/off are instant
         gw_timeout = provider.max_wall_s() if hasattr(provider, "max_wall_s") else float(os.environ.get("LLM_TIMEOUT_S") or 30)
         return cls(cat, Gateway(provider=provider, timeout_s=gw_timeout,

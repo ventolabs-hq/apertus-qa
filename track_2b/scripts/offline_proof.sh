@@ -87,4 +87,23 @@ tr=d.get('trace') or {}
 assert (tr.get('router') or {}).get('reason') == 'network_error' or (tr.get('router') or {}).get('mode') == 'fallback'
 "
 echo
+echo "## 6. Recorded REAL Apertus outputs replay with no network (LLM_MODE=replay; separate file, never loaded by the STUB)"
+if [ -f src/apertus_qa/replay/apertus_real.json ] && [ -f docs/eval/eval_main_record.json ]; then
+  for s in main heldout; do
+    echo "\$ docker run --rm --network none -e LLM_MODE=replay $IMG python -m eval.run_eval --mode replay --set $s --out /tmp/x"
+    docker run --rm --network none -e LLM_MODE=replay $IMG sh -c "python -m eval.run_eval --mode replay --set $s --out /tmp/x >/dev/null && cat /tmp/x/eval_${s}_replay.json" | python3 -c "
+import sys,json
+rep=json.load(sys.stdin); rec=json.load(open('docs/eval/eval_${s}_record.json'))
+a,b=rep['summary'],rec['summary']
+print('  ',{k:a[k] for k in ('set','overall_ok','grounding_violations','router_model','phrase_model','label','model') if k in a} if 'set' in a else {k:a[k] for k in ('overall_ok','grounding_violations','router_model','phrase_model','label','model')})
+same=[(x['id'],x['answer'],x['ok'],x['router'],x['phrase']) for x in rep['rows']]==[(x['id'],x['answer'],x['ok'],x['router'],x['phrase']) for x in rec['rows']]
+print('   identical to the recorded real run (answers, scores, router/phrasing modes):', same)
+assert same and a['overall_ok']==b['overall_ok'] and a['grounding_violations']==0
+"
+  done
+else
+  echo "  (no replay file / recorded run in this checkout: skipped)"
+fi
+
+echo
 echo "offline-proof: OK (air-gap + STUB UI marker + tests/evals + safe real-mode fallback)"

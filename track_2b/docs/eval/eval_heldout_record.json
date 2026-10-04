@@ -1,7 +1,7 @@
 {
  "summary": {
-  "label": "REAL model",
-  "mode": "real",
+  "label": "REAL model (recording)",
+  "mode": "record",
   "model": "swiss-ai/Apertus-v1.5-70B",
   "questions": 13,
   "answerable": 11,
@@ -17,13 +17,13 @@
   "router_fallback": 0,
   "phrase_model": 5,
   "phrase_fallback": 6,
-  "seconds": 31.03,
+  "seconds": 30.92,
   "snapshot": "2026-10-02T14:20:15+00:00",
-  "run_at": "2026-10-04T09:44:48-0300",
-  "code_sha256": "6fd7103d422b7545044e4bcc7c7a5c19062fb059d6b5bf701b2267f3d8ad37ab",
-  "latency_ms_p50": 2636,
-  "latency_ms_p95": 2960,
-  "latency_ms_max": 2960,
+  "run_at": "2026-10-04T09:51:36-0300",
+  "code_sha256": "6612741a10e9574c15666240aa60937a5eca2ecf55d90e11a2d7260ec5a92242",
+  "latency_ms_p50": 2430,
+  "latency_ms_p95": 2952,
+  "latency_ms_max": 2952,
   "fallback_reasons": {
    "phrase:invalid:digits_in_text": 4,
    "phrase:invalid:number_words": 2
@@ -52,7 +52,7 @@
    "citation_ok": true,
    "grounded": true,
    "ok": true,
-   "latency_ms": 2908,
+   "latency_ms": 2916,
    "tokens": 5648,
    "model_calls": 2
   },
@@ -71,7 +71,7 @@
    "citation_ok": false,
    "grounded": true,
    "ok": false,
-   "latency_ms": 2749,
+   "latency_ms": 2872,
    "tokens": 5648,
    "model_calls": 2
   },
@@ -90,7 +90,7 @@
    "citation_ok": true,
    "grounded": true,
    "ok": true,
-   "latency_ms": 2636,
+   "latency_ms": 2430,
    "tokens": 5567,
    "model_calls": 2
   },
@@ -109,7 +109,7 @@
    "citation_ok": true,
    "grounded": true,
    "ok": true,
-   "latency_ms": 2256,
+   "latency_ms": 2278,
    "tokens": 5559,
    "model_calls": 2
   },
@@ -128,7 +128,7 @@
    "citation_ok": true,
    "grounded": true,
    "ok": true,
-   "latency_ms": 2647,
+   "latency_ms": 2683,
    "tokens": 5586,
    "model_calls": 2
   },
@@ -147,7 +147,7 @@
    "citation_ok": true,
    "grounded": true,
    "ok": true,
-   "latency_ms": 2252,
+   "latency_ms": 2424,
    "tokens": 5555,
    "model_calls": 2
   },
@@ -166,7 +166,7 @@
    "citation_ok": true,
    "grounded": true,
    "ok": true,
-   "latency_ms": 2318,
+   "latency_ms": 2396,
    "tokens": 5572,
    "model_calls": 2
   },
@@ -185,7 +185,7 @@
    "citation_ok": true,
    "grounded": true,
    "ok": true,
-   "latency_ms": 2609,
+   "latency_ms": 2412,
    "tokens": 5564,
    "model_calls": 2
   },
@@ -204,7 +204,7 @@
    "citation_ok": true,
    "grounded": true,
    "ok": true,
-   "latency_ms": 2960,
+   "latency_ms": 2826,
    "tokens": 5659,
    "model_calls": 2
   },
@@ -223,7 +223,7 @@
    "citation_ok": true,
    "grounded": true,
    "ok": true,
-   "latency_ms": 2865,
+   "latency_ms": 2688,
    "tokens": 5622,
    "model_calls": 2
   },
@@ -242,7 +242,7 @@
    "citation_ok": true,
    "grounded": true,
    "ok": true,
-   "latency_ms": 2800,
+   "latency_ms": 2952,
    "tokens": 5673,
    "model_calls": 2
   },
@@ -261,7 +261,7 @@
    "citation_ok": null,
    "grounded": true,
    "ok": true,
-   "latency_ms": 1008,
+   "latency_ms": 1030,
    "tokens": 5220,
    "model_calls": 1
   },
@@ -280,7 +280,7 @@
    "citation_ok": null,
    "grounded": true,
    "ok": true,
-   "latency_ms": 1012,
+   "latency_ms": 1010,
    "tokens": 5227,
    "model_calls": 1
   }

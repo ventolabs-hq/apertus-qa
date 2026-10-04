@@ -6,7 +6,8 @@ RUN useradd --system --uid 10001 --home /app app
 WORKDIR /app
 COPY data/snapshot/ /app/data/snapshot/
 COPY src/ /app/src/
-RUN python -m compileall -q /app/src && chown -R app /app/src/apertus_qa/stub
+RUN mkdir -p /app/src/apertus_qa/replay && python -m compileall -q /app/src && \
+    chown -R app /app/src/apertus_qa/stub /app/src/apertus_qa/replay
 USER app
 WORKDIR /app/src
 EXPOSE 8080

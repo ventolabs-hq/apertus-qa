@@ -24,6 +24,7 @@ help:
 	@echo "make run | test | eval | eval-heldout | offline-proof | report   (Docker)"
 	@echo "make run-local | test-local | eval-local (host Python >= 3.10, no Docker)"
 	@echo "make leak-check | install-hooks   (secret leak check; pre-commit hook)"
+	@echo "LLM_MODE=replay make eval | eval-heldout | run   (replay recorded REAL Apertus outputs offline, no key)"
 	@echo "make image-save  -> apertus-qa.tar for air-gapped transfer (docker load -i apertus-qa.tar)"
 
 check-docker:

@@ -21,17 +21,17 @@
 | phrase_fallback | 7 |
 | seconds | 0.01 |
 | snapshot | 2026-10-02T14:20:15+00:00 |
-| run_at | 2026-10-04T09:43:06-0300 |
-| code_sha256 | 6fd7103d422b7545044e4bcc7c7a5c19062fb059d6b5bf701b2267f3d8ad37ab |
+| run_at | 2026-10-04T09:54:54-0300 |
+| code_sha256 | 6612741a10e9574c15666240aa60937a5eca2ecf55d90e11a2d7260ec5a92242 |
 | latency_ms_p50 | 0 |
-| latency_ms_p95 | 1 |
-| latency_ms_max | 1 |
+| latency_ms_p95 | 2 |
+| latency_ms_max | 2 |
 | fallback_reasons | {'phrase:no_provider': 7, 'router:no_provider': 13} |
 | set | heldout |
 
 | id | ok | decisión | valores | cita | router | redacción | ms | respuesta |
 |---|---|---|---|---|---|---|---|---|
-| p_ipc_jul26 | ✔ | True | True | True | fallback (no_provider) | fallback (no_provider) | 1 | IPC Nivel General Nacional (base dic-2016 = 100): variación mensual de 2,1 % en julio de 2026 (respecto de junio de 2026). |
+| p_ipc_jul26 | ✔ | True | True | True | fallback (no_provider) | fallback (no_provider) | 2 | IPC Nivel General Nacional (base dic-2016 = 100): variación mensual de 2,1 % en julio de 2026 (respecto de junio de 2026). |
 | p_vida_2024 | ✘ | False | False | False | fallback (no_provider) | None | 0 | No puedo responder eso con los datos de este sistema. Cubre: precios (IPC), salarios registrados, población, nacimientos, tipo de cambio anu |
 | p_crudo_oct25 | ✔ | True | True | True | fallback (no_provider) | fallback (no_provider) | 0 | Producción de petróleo crudo, octubre de 2025: 4.187,6 miles de m³. |
 | p_gente_2015 | ✘ | False | False | False | fallback (no_provider) | None | 0 | No puedo responder eso con los datos de este sistema. Cubre: precios (IPC), salarios registrados, población, nacimientos, tipo de cambio anu |

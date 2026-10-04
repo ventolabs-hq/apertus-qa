@@ -60,6 +60,7 @@ def code_fingerprint() -> str:
     import hashlib
     root = HERE.parent
     files = sorted((root / "apertus_qa").glob("*.py")) + sorted((root / "apertus_qa" / "stub").glob("*.json")) + \
+        sorted((root / "apertus_qa" / "web").glob("*.html")) + \
         [HERE / "run_eval.py", HERE / "questions.jsonl", HERE / "questions_heldout.jsonl"]
     h = hashlib.sha256()
     for f in files:
@@ -91,6 +92,7 @@ def main(argv=None):
     ap.add_argument("--mode", default=os.environ.get("LLM_MODE") or "stub")
     ap.add_argument("--out", default=str(HERE.parents[1] / "docs" / "eval"))
     ap.add_argument("--set", default="main", choices=["main", "heldout"])
+    ap.add_argument("--tag", default="", help="suffix for output files, e.g. 8b -> eval_main_real_8b.json")
     a = ap.parse_args(argv)
     qa = QA.from_env(a.mode)
     items = [json.loads(l) for l in (HERE / ("questions.jsonl" if a.set == "main" else "questions_heldout.jsonl")).read_text().splitlines() if l.strip()]
@@ -112,9 +114,11 @@ def main(argv=None):
     ans = [r for r in rows if r["values_ok"] is not None]
     ref = [r for r in rows if r["values_ok"] is None]
     label = {"stub": "STUB (canned replay, not real Apertus)", "off": "NO-MODEL baseline (rules + templates)",
-             "real": "REAL model", "record": "REAL model (recording)"}.get(qa.mode, qa.mode)
+             "real": "REAL model", "record": "REAL model (recording)",
+             "replay": "REPLAY of recorded real Apertus outputs (offline, no model call)"}.get(qa.mode, qa.mode)
     summ = {
-        "label": label, "mode": qa.mode, "model": os.environ.get("LLM_NAME") if qa.mode in ("real", "record") else None,
+        "label": label, "mode": qa.mode, "model": os.environ.get("LLM_NAME") if qa.mode in ("real", "record") else
+            getattr(prov, "model", None) if qa.mode == "replay" else None,
         "questions": n, "answerable": len(ans), "must_refuse": len(ref),
         "overall_ok": sum(r["ok"] for r in rows),
         "answer_correct": sum(bool(r["values_ok"]) for r in ans),
@@ -137,7 +141,8 @@ def main(argv=None):
                      "completion_tokens": u["completion_tokens"], "total_tokens": u["total_tokens"]})
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
-    (out / f"eval_{a.set}_{qa.mode}.json").write_text(json.dumps({"summary": summ, "rows": rows}, ensure_ascii=False, indent=1))
+    stem = f"eval_{a.set}_{qa.mode}" + (f"_{a.tag}" if a.tag else "")
+    (out / f"{stem}.json").write_text(json.dumps({"summary": summ, "rows": rows}, ensure_ascii=False, indent=1))
     summ["set"] = a.set
     lines = [f"# Eval ({a.set}) — {label}", "", "| métrica | valor |", "|---|---|"] + [f"| {k} | {v} |" for k, v in summ.items()]
     lines += ["", "| id | ok | decisión | valores | cita | router | redacción | ms | respuesta |", "|---|---|---|---|---|---|---|---|---|"]
@@ -145,7 +150,7 @@ def main(argv=None):
         lines.append(f"| {r['id']} | {'✔' if r['ok'] else '✘'} | {r['decision_ok']} | {r['values_ok']} | {r['citation_ok']} | "
                      f"{r['router']}{' (' + str(r['router_reason']) + ')' if r['router_reason'] else ''} | "
                      f"{r['phrase']}{' (' + str(r['phrase_reason']) + ')' if r['phrase_reason'] else ''} | {r['latency_ms']} | {r['answer'][:140].replace('|', '/')} |")
-    (out / f"eval_{a.set}_{qa.mode}.md").write_text("\n".join(lines) + "\n")
+    (out / f"{stem}.md").write_text("\n".join(lines) + "\n")
     print(json.dumps(summ, ensure_ascii=False, indent=1))
     return 0 if summ["grounding_violations"] == 0 else 1
 

@@ -39,7 +39,8 @@ def make_handler(qa: QA):
                 return self._send(200, (WEB / "index.html").read_bytes(), "text/html; charset=utf-8")
             if self.path == "/health":
                 st = qa.gateway.status()
-                return self._json(200, {"ok": True, "model_mode": qa.mode, "model": os.environ.get("LLM_NAME") if qa.mode in ("real", "record") else None,
+                return self._json(200, {"ok": True, "model_mode": qa.mode, "model": os.environ.get("LLM_NAME") if qa.mode in ("real", "record") else
+                                        getattr(qa.gateway.provider, "model", None) if qa.mode == "replay" else None,
                                         "model_available": st["available"], "model_status": st.get("reason"),
                                         "snapshot": qa.catalog.built_at, "entries": len(qa.catalog.doc["entries"])})
             if self.path == "/api/catalog":

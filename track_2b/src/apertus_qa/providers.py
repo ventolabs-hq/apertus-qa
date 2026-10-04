@@ -3,8 +3,8 @@
 - StubProvider: deterministic replay of canned outputs (no network). Used for tests/eval until the key arrives.
 - OpenAICompatProvider: any OpenAI-style /chat/completions endpoint (CSCS-hosted Apertus, or self-hosted vLLM /
   Ollama / llama.cpp server). Python stdlib only (urllib), so the image has no third-party dependencies.
-- RecordingProvider: wraps a real provider and saves its outputs in the stub format, so a real Apertus run can be
-  replayed offline (e.g. by judges without a key)."""
+- RecordingProvider: wraps a real provider and saves its outputs (LLM_MODE=record) to a SEPARATE replay file.
+- ReplayProvider: replays that file offline (LLM_MODE=replay), e.g. for judges without a key. The STUB never loads it."""
 from __future__ import annotations
 
 import json
@@ -51,6 +51,18 @@ class StubProvider:
         if isinstance(v, dict) and "__raise__" in v:          # scripted failure for tests
             raise ProviderError(v["__raise__"], code=v["__raise__"], status=v.get("status"))
         return v if isinstance(v, str) else json.dumps(v, ensure_ascii=False)
+
+
+class ReplayProvider(StubProvider):
+    """Replays REAL model outputs recorded with LLM_MODE=record (separate file; the STUB never loads it). Offline."""
+    name = "replay"
+
+    def __init__(self, path: str | Path):
+        super().__init__(path)
+        p = Path(path)
+        d = json.loads(p.read_text()) if p.exists() else {}
+        self.meta = {k: v for k, v in d.items() if k.startswith("_")}
+        self.model = self.meta.get("_model")
 
 
 class OpenAICompatProvider:
@@ -155,8 +167,12 @@ class RecordingProvider:
 
     def generate(self, *, system: str, user: str, task: str, key: str) -> str:
         out = self.inner.generate(system=system, user=user, task=task, key=key)
-        with self._lock:
-            d = json.loads(self.path.read_text()) if self.path.exists() else {"_about": "recorded real model outputs"}
+        with self._lock:   # only model ids and raw model text are stored: never the endpoint URL, headers or key
+            d = json.loads(self.path.read_text()) if self.path.exists() else {
+                "_about": "REAL model outputs recorded with LLM_MODE=record; replayed offline with LLM_MODE=replay"}
+            d["_model"] = getattr(self.inner, "model", None)
+            d["_recorded_at"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
             d.setdefault(task, {})[key] = out
+            self.path.parent.mkdir(parents=True, exist_ok=True)
             self.path.write_text(json.dumps(d, ensure_ascii=False, indent=1))
         return out

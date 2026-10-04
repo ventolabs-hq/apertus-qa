@@ -295,6 +295,26 @@ class TestPipelineOffline(unittest.TestCase):
             a = QA.from_env("off").answer("¿Cuántos habitantes tenía Argentina en 2025?")
         self.assertIn("46.387.098", a["answer"])
 
+    def test_stub_never_loads_replay_and_replay_is_separate(self):
+        from apertus_qa import pipeline
+        from apertus_qa.providers import ReplayProvider
+        self.assertEqual([p.name for p in pipeline.STUB_FILES], ["canned.json"])
+        with tempfile.TemporaryDirectory() as td:
+            f = Path(td) / "rep.json"
+            plan = {"action": "answer", "op": "valor", "series": ["9.1_POB_2004_A_9"], "period": "2015"}
+            f.write_text(json.dumps({"_model": "swiss-ai/Apertus-v1.5-70B", "router": {"¿Gente en 2015?": json.dumps(plan)},
+                                     "phrase": {"¿Gente en 2015?": json.dumps({"texto": "En {periodo} había {valor}."})}}))
+            with mock.patch.object(pipeline, "REPLAY_FILE", f), no_internet():
+                qa = QA.from_env("replay")
+                a = qa.answer("¿Gente en 2015?")
+                miss = qa.answer("¿Cuántos habitantes tenía Argentina en 2025?")
+            self.assertEqual((qa.mode, a["trace"]["router"]["mode"], a["trace"]["phrase"]["mode"]), ("replay", "llm", "llm"))
+            self.assertEqual(a["figures"][0]["value"], 43131966.0)
+            self.assertEqual(miss["trace"]["router"]["reason"], "stub_miss")    # not recorded -> rules fallback, offline
+            self.assertEqual(ReplayProvider(f).model, "swiss-ai/Apertus-v1.5-70B")
+            stub = QA.from_env("stub").answer("¿Gente en 2015?")
+            self.assertEqual(stub["trace"]["router"]["reason"], "stub_miss")     # the STUB does not see the replay file
+
     def test_unknown_question_in_stub_falls_back_to_rules(self):
         a = QA.from_env("stub").answer("¿Cuánta potencia eólica instalada había en 2020?")
         self.assertEqual(a["trace"]["router"]["reason"], "stub_miss")

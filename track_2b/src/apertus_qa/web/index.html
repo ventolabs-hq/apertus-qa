@@ -44,6 +44,7 @@ let MODEL_MODE="unknown";
 function stepLabel(mode){
   if(MODEL_MODE==="stub" && mode==="llm") return "stub";
   if(MODEL_MODE==="off" && mode==="llm") return "off";
+  if(MODEL_MODE==="replay" && mode==="llm") return "replay";
   return mode||"?";
 }
 EX.forEach(e=>{const a=document.createElement("a");a.href="#";a.textContent=e;a.onclick=ev=>{ev.preventDefault();$("#q").value=e;ask()};$("#ex").appendChild(a)});
@@ -55,6 +56,8 @@ fetch("/health").then(r=>r.json()).then(h=>{
     ?`<span class="badge stub">modelo: STUB (respuestas grabadas · NO Apertus)</span>`
     :MODEL_MODE==="off"
       ?`<span class="badge">modelo: sin modelo (reglas)</span>`
+    :MODEL_MODE==="replay"
+      ?`<span class="badge">modelo: REPLAY · salidas reales grabadas de ${esc(h.model||"Apertus")} (sin llamada al modelo)</span>`
       :`<span class="badge">modelo: ${esc(h.model||MODEL_MODE)}</span>`;
   $("#st").innerHTML=`${modeBadge}<span class="badge">snapshot ${esc((h.snapshot||"").slice(0,10))}</span><span class="badge">${h.entries} series/tablas</span><span class="badge">sin internet salvo el modelo</span>`;
 });

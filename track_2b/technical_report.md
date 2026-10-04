@@ -2,13 +2,14 @@
 
 - **Track:** Track 2B — Apertus QA (own project)
 - **Event:** Online
-- **Team:** Vento Labs — `[[ENTRANT_NAME]]`
+- **Team / entrant:** Vento Labs
 - **Demo:** `[[VIDEO_URL]]` (≤ 2 min, screen capture + captions)
 - **Code:** `[[REPO_URL]]` @ `[[COMMIT]]`
 
 > **Status.** Numbers marked *STUB* come from replayed outputs **written by the build agent, not by Apertus**, or from the
-> no-model baseline. Numbers marked **Apertus** come from real calls to `swiss-ai/Apertus-v1.5-70B` on the CSCS inference
-> endpoint (4 Oct 2026; raw outputs in `docs/eval/eval_*_real.*`, summary in `docs/eval/REAL_RUN_2026-10-04.md`).
+> no-model baseline. Numbers marked **Apertus** come from real calls to `swiss-ai/Apertus-v1.5-70B` (and, for comparison,
+> `swiss-ai/Apertus-v1.5-8B`) on the CSCS inference endpoint (4 Oct 2026; raw outputs in `docs/eval/eval_*_record.*` and
+> `eval_*_real_8b.*`, summary in `docs/eval/REAL_RUN_2026-10-04.md`).
 
 ## 1. Summary
 
@@ -21,7 +22,7 @@ data cannot answer, and refuses forecasts and financial advice. Everything excep
 `docker run --network none`, and the model can be a self-hosted Apertus on the same isolated network.
 *STUB/baseline:* main set 31/31, held-out paraphrases 8/13, 0 grounding violations, 5/5 INDEC cross-checks.
 **Apertus v1.5-70B (real, CSCS):** main 30/31, held-out paraphrases **12/13** (baseline 8/13), 0 grounding violations,
-0 false refusals, 5/5 INDEC cross-checks; median 2.5 s per question.
+0 false refusals, 5/5 INDEC cross-checks; median 2.5 s per question. Apertus v1.5-8B with the same prompts: 22/31 and 9/13.
 
 ## 2. Architecture
 
@@ -88,14 +89,14 @@ shows `fallback (network_error)` and the answer is still correct and cited — t
 | Serving | CSCS endpoint or any OpenAI-style server via `LLM_BASE_URL`, `LLM_NAME`, `LLM_API_KEY`; `/chat/completions`, temperature 0; optional `response_format: json_object` |
 | P1 prompt | Spanish instructions + compact catalog (ids, titles, units, frequency, coverage; **no values**; ≈4k tokens) → `{action, op, series, period, from, to, amount, n, …}` or `{action: "refuse", reason}` (out of scope / forecast / advice / other). Out-of-coverage periods pass through so code can explain coverage. |
 | P2 prompt | Question, operation, placeholder descriptions, direction hints → `{"texto": …}`, one or two sentences |
-| Record/replay | `LLM_MODE=record` saves real outputs, so judges can replay a real run with no key or network (labelled as replay) |
+| Record/replay | `LLM_MODE=record` saves real outputs to a separate file; `LLM_MODE=replay` replays them with no key or network (labelled REPLAY; the STUB never loads it). The replay reproduces the 70B run row by row (30/31, 12/13), also under `--network none` |
 
 **Observed behaviour (real runs, 44 questions, 78 calls).** Every output parsed as JSON (0 `bad_json`); 0 HTTP errors,
 0 timeouts, 0 retries. *Router:* plan used for 24/31 main and 13/13 held-out questions; the 7 main rejections went to the
 rules router (period format 2, unknown/ill-formed series 2, table/operation mismatch 1, change operation on a series that
 is already a % change 2). *Phrasing:* text used for 11/23 main and 5/11 held-out answers; rejections (→ template) were
 digits (main 10, held-out 4; on the main set mostly years copied from the question), number words (1 / 2) and a missing placeholder (1 / 0).
-*Latency* per question (router + phrasing + computation): main p50 2.5 s, p95 3.4 s, max 3.5 s; held-out p50 2.6 s,
+*Latency* per question (router + phrasing + computation): main p50 2.5 s, p95 3.5 s, max 3.6 s; held-out p50 2.4 s,
 p95 3.0 s, max 3.0 s. *Tokens:* 171,117 (main, 54 calls) and 72,100 (held-out, 24 calls). *Prompt iterations,* on the main
 set only: 19 → 21 → 29 → 29 → 30/31. The first real run refused 7 questions about 2025–26 as "forecasts"; giving the router
 the snapshot date plus six few-shot plans fixed that; a validator now sends "% change of a % series" plans to the rules
@@ -137,6 +138,8 @@ target 0), false refusals, fallback rates by reason.
 | No-model baseline | held-out | 8/13 | 6/11 | 2/2 | 4 | 0 |
 | **Apertus v1.5-70B** (real) | main | 30/31 | 23/23 | 7/8 | 0 | 0 |
 | **Apertus v1.5-70B** (real) | held-out | **12/13** | 10/11 | 2/2 | 0 | 0 |
+| Apertus v1.5-8B (real, same prompts) | main | 22/31 | 15/23 | 7/8 | 8 | 0 |
+| Apertus v1.5-8B (real, same prompts) | held-out | 9/13 | 7/11 | 2/2 | 4 | 0 |
 
 Baseline and STUB rows reproduced in the Docker image with `--network none`; Apertus rows run from the same code on the
 host (`LLM_MODE=real make eval-local`, smoke-tested in the image); INDEC cross-checks 5/5 in the final main runs.
@@ -154,13 +157,17 @@ punta?" was planned as the Nov→Dec 2024 change (2.7 %) instead of the Dec–De
 with its series and period, i.e. the residual failure mode in §2. Plan errors caught by validators: 7/31 main, 0/13
 held-out; wrong plans that passed: 1 (held-out). The endpoint is not fully deterministic at temperature 0: in one earlier
 run with the same prompts, miss (2) was a refusal instead; the score was 12/13 in all held-out runs.
+**8B** (p50 1.8 s main / 2.0 s held-out; p95 2.3 s / 4.1 s) mostly over-refuses (recent CPI as "forecast"; subway, tourism
+and oil questions as out of scope). On one must-refuse question ("¿Cuántos pasajeros transportaron las aerolíneas en
+2025?") it answered with the real 2025 subway + premetro total, correctly cited, but worded as airline passengers: it
+passes the numeric grounding check (G5 verifies numbers, not labels), so we ship 70B and list label checks as future work.
 
 ## 6. Limitations
 
 Fixed coverage (47 entries; no unemployment, poverty or GDP yet; CPI to Aug 2026). A valid but wrong plan can answer a
 slightly different question (1/13 held-out for the baseline); plan–question consistency checks are planned. Spanish only,
-single turn. Real-model results come from one model (v1.5-70B) and 44 questions, with prompts iterated on the main set; no
-8B comparison yet; self-hosted Apertus untested (no GPU); no load or accessibility testing.
+single turn. Real-model results come from 44 questions, with prompts iterated on the 70B main set; grounding checks numbers,
+not the wording around them (see the 8B case); self-hosted Apertus untested (no GPU); no load or accessibility testing.
 
 ## 7. Reproducibility
 
@@ -168,11 +175,11 @@ From `track_2b/`: `make run` (UI at `http://localhost:8080`), `make test`, `make
 `make offline-proof`, `make report` (this PDF). STUB and off modes are deterministic: `docs/eval/` regenerates
 identically (apart from a timing field). Verified on Docker Engine 29.8.2, Linux x86-64, CPU only. Without Docker: `make run-local` /
 `test-local` / `eval-local` (Python ≥ 3.10). Real runs: set `LLM_BASE_URL`, `LLM_NAME`, `LLM_API_KEY`, then
-`LLM_MODE=record make eval`. Commit: `[[COMMIT]]`.
+`LLM_MODE=record make eval`; without a key, `LLM_MODE=replay make eval` replays the recorded 70B run offline. Commit: `[[COMMIT]]`.
 
 ## 8. Next steps
 
-An 8B comparison and a recorded real run for key-less replay; a larger fresh held-out set; plan–question consistency checks; more series
+A larger fresh held-out set; plan–question and series-label consistency checks; more series
 (labour market, GDP, provinces); a second statistics office (e.g. BFS / opendata.swiss) through the same catalog format; a
 measured self-hosted deployment on an isolated GPU node.
 
