@@ -82,7 +82,7 @@ none
 
 ## 4. Test suite and both eval sets, no network
 $ make test   (docker run --rm --network none ... unittest)
-Ran 40 tests in 1.163s
+Ran 41 tests in 1.176s
 
 OK
 $ docker run --rm --network none -e LLM_MODE=stub apertus-qa:local python -m eval.run_eval --mode stub --set main --out /tmp/x
